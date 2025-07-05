@@ -266,28 +266,86 @@ class DataFetcher:
     
     def fetch_daily_data(self) -> Dict[str, pd.DataFrame]:
         """
-        Fetch data for today and yesterday.
+        Fetch data for recent days with lag for weather data availability.
+        Weather data typically has a 2-3 day reporting delay.
         
         Returns:
             Dictionary containing weather and energy DataFrames
         """
-        today = datetime.now()
-        yesterday = today - timedelta(days=1)
-        
-        today_str = today.strftime('%Y-%m-%d')
-        yesterday_str = yesterday.strftime('%Y-%m-%d')
-        
-        self.logger.info(f"Fetching daily data for {yesterday_str} to {today_str}")
-        
-        # Fetch weather and energy data
-        weather_data = self.fetch_all_weather_data(yesterday_str, today_str)
-        energy_data = self.fetch_all_energy_data(yesterday_str, today_str)
-        
-        return {
-            'weather': weather_data,
-            'energy': energy_data,
-            'date': today_str
-        }
+        try:
+            today = datetime.now()
+            
+            # Use 4-day lag for weather data due to reporting delays
+            weather_end_date = today - timedelta(days=4)
+            weather_start_date = weather_end_date - timedelta(days=2)
+            
+            # Use 1-day lag for energy data (more timely)
+            energy_end_date = today - timedelta(days=1)
+            energy_start_date = energy_end_date - timedelta(days=1)
+            
+            weather_start_str = weather_start_date.strftime('%Y-%m-%d')
+            weather_end_str = weather_end_date.strftime('%Y-%m-%d')
+            energy_start_str = energy_start_date.strftime('%Y-%m-%d')
+            energy_end_str = energy_end_date.strftime('%Y-%m-%d')
+            
+            self.logger.info(f"Fetching daily data - Weather: {weather_start_str} to {weather_end_str}, Energy: {energy_start_str} to {energy_end_str}")
+            
+            # Initialize empty dataframes in case of failures
+            weather_data = pd.DataFrame()
+            energy_data = pd.DataFrame()
+            
+            # Fetch weather data with error handling
+            try:
+                weather_data = self.fetch_all_weather_data(weather_start_str, weather_end_str)
+                
+                # If no weather data found, try with additional lag
+                if weather_data.empty:
+                    self.logger.warning(f"No weather data found for {weather_start_str} to {weather_end_str}, trying with additional lag")
+                    fallback_weather_end = today - timedelta(days=6)
+                    fallback_weather_start = fallback_weather_end - timedelta(days=3)
+                    fallback_start_str = fallback_weather_start.strftime('%Y-%m-%d')
+                    fallback_end_str = fallback_weather_end.strftime('%Y-%m-%d')
+                    
+                    self.logger.info(f"Trying fallback weather data range: {fallback_start_str} to {fallback_end_str}")
+                    weather_data = self.fetch_all_weather_data(fallback_start_str, fallback_end_str)
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to fetch weather data: {e}")
+                weather_data = pd.DataFrame()
+            
+            # Fetch energy data with error handling
+            try:
+                energy_data = self.fetch_all_energy_data(energy_start_str, energy_end_str)
+            except Exception as e:
+                self.logger.error(f"Failed to fetch energy data: {e}")
+                energy_data = pd.DataFrame()
+            
+            # Log final data availability
+            weather_available = not weather_data.empty
+            energy_available = not energy_data.empty
+            self.logger.info(f"Daily data fetch summary - Weather: {len(weather_data)} records, Energy: {len(energy_data)} records")
+            
+            if not weather_available and not energy_available:
+                self.logger.warning("No data available from either weather or energy sources")
+            
+            return {
+                'weather': weather_data,
+                'energy': energy_data,
+                'date': today.strftime('%Y-%m-%d'),
+                'weather_date_range': f"{weather_start_str} to {weather_end_str}",
+                'energy_date_range': f"{energy_start_str} to {energy_end_str}"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Critical error in fetch_daily_data: {e}")
+            # Return empty data structure to prevent pipeline crash
+            return {
+                'weather': pd.DataFrame(),
+                'energy': pd.DataFrame(),
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'weather_date_range': "N/A",
+                'energy_date_range': "N/A"
+            }
     
     def save_raw_data(self, data: Dict[str, pd.DataFrame], prefix: str = "raw"):
         """

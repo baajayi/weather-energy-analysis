@@ -8,6 +8,7 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 import yaml
+import pandas as pd
 
 # Add the src directory to the path
 sys.path.append(str(Path(__file__).parent))
@@ -64,43 +65,115 @@ class WeatherEnergyPipeline:
         try:
             self.logger.info("Starting daily pipeline execution")
             
-            # Fetch daily data
-            daily_data = self.fetcher.fetch_daily_data()
+            # Fetch daily data with retry logic
+            daily_data = None
+            max_attempts = 2
             
-            if not daily_data['weather'].empty and not daily_data['energy'].empty:
-                # Process the data
+            for attempt in range(max_attempts):
+                try:
+                    self.logger.info(f"Attempting to fetch daily data (attempt {attempt + 1}/{max_attempts})")
+                    daily_data = self.fetcher.fetch_daily_data()
+                    break  # Success, exit retry loop
+                except Exception as e:
+                    self.logger.warning(f"Data fetch attempt {attempt + 1} failed: {e}")
+                    if attempt == max_attempts - 1:
+                        self.logger.error("All data fetch attempts failed")
+                        # Create empty data structure for fallback processing
+                        daily_data = {
+                            'weather': pd.DataFrame(),
+                            'energy': pd.DataFrame(),
+                            'date': datetime.now().strftime('%Y-%m-%d'),
+                            'weather_date_range': "N/A",
+                            'energy_date_range': "N/A"
+                        }
+                    else:
+                        # Wait a bit before retrying
+                        import time
+                        time.sleep(5)
+            
+            if daily_data is None:
+                raise Exception("Failed to initialize daily data structure")
+            
+            # Check data availability
+            weather_available = not daily_data['weather'].empty
+            energy_available = not daily_data['energy'].empty
+            
+            if weather_available and energy_available:
+                # Process the data with both weather and energy
                 processed_data = self.processor.process_all_data(
                     daily_data['weather'], 
                     daily_data['energy']
                 )
+                data_type = "complete"
+            elif energy_available:
+                # Process with energy data only
+                self.logger.warning("Weather data unavailable, processing energy data only")
+                processed_data = self.processor.process_energy_only(daily_data['energy'])
+                data_type = "energy_only"
+            elif weather_available:
+                # Process with weather data only
+                self.logger.warning("Energy data unavailable, processing weather data only")
+                processed_data = self.processor.process_weather_only(daily_data['weather'])
+                data_type = "weather_only"
+            else:
+                self.logger.warning("No new data available from either source for daily update")
+                # Try to return status based on existing data instead of failing
+                try:
+                    latest_data = self.processor.get_latest_data()
+                    if latest_data is not None and not latest_data.empty:
+                        self.logger.info("No new data available, but existing processed data found")
+                        return {
+                            "status": "warning",
+                            "message": "No new data available for daily update",
+                            "existing_records": len(latest_data),
+                            "last_data_date": str(latest_data['date'].max()) if 'date' in latest_data.columns else "Unknown",
+                            "data_type": "existing_only"
+                        }
+                    else:
+                        self.logger.warning("No new data and no existing processed data found")
+                        return {
+                            "status": "warning", 
+                            "message": "No data available from either source and no existing data found",
+                            "data_type": "none"
+                        }
+                except Exception as e:
+                    self.logger.error(f"Error checking existing data: {e}")
+                    return {
+                        "status": "warning",
+                        "message": "No new data available for daily update",
+                        "data_type": "none"
+                    }
                 
-                if not processed_data.empty:
-                    # Run quality analysis
-                    quality_report = self.analyzer.check_data_quality(processed_data)
-                    quality_score = self.analyzer.get_data_quality_score(processed_data)
-                    
-                    # Save quality report
+            if not processed_data.empty:
+                # Run quality analysis
+                quality_report = self.analyzer.check_data_quality(processed_data)
+                quality_score = self.analyzer.get_data_quality_score(processed_data)
+                
+                # Save quality report with error handling
+                try:
                     self.analyzer.save_quality_report(quality_report, 
                                                     f"daily_quality_report_{daily_data['date']}.json")
-                    
-                    self.logger.info(f"Daily pipeline completed successfully. Quality score: {quality_score:.1f}/100")
-                    
-                    # Log any quality issues
-                    if quality_score < 80:
-                        self.logger.warning(f"Data quality score is below 80: {quality_score:.1f}")
-                    
-                    return {
-                        "status": "success",
-                        "processed_records": len(processed_data),
-                        "quality_score": quality_score,
-                        "date": daily_data['date']
-                    }
-                else:
-                    self.logger.error("No data remained after processing")
-                    return {"status": "error", "message": "No data after processing"}
+                except Exception as e:
+                    self.logger.warning(f"Failed to save quality report: {e}")
+                
+                self.logger.info(f"Daily pipeline completed successfully. Quality score: {quality_score:.1f}/100, Data type: {data_type}")
+                
+                # Log any quality issues
+                if quality_score < 80:
+                    self.logger.warning(f"Data quality score is below 80: {quality_score:.1f}")
+                
+                return {
+                    "status": "success",
+                    "processed_records": len(processed_data),
+                    "quality_score": quality_score,
+                    "date": daily_data['date'],
+                    "data_type": data_type,
+                    "weather_available": weather_available,
+                    "energy_available": energy_available
+                }
             else:
-                self.logger.error("Failed to fetch daily data")
-                return {"status": "error", "message": "Failed to fetch daily data"}
+                self.logger.error("No data remained after processing")
+                return {"status": "error", "message": "No data after processing"}
                 
         except Exception as e:
             self.logger.error(f"Error in daily pipeline: {e}")
@@ -201,10 +274,23 @@ class WeatherEnergyPipeline:
             # Basic statistics
             total_records = len(latest_data)
             cities = latest_data['city'].nunique() if 'city' in latest_data.columns else 0
-            date_range = {
-                "start": latest_data['date'].min().isoformat() if 'date' in latest_data.columns else None,
-                "end": latest_data['date'].max().isoformat() if 'date' in latest_data.columns else None
-            }
+            # Handle date range safely
+            if 'date' in latest_data.columns:
+                try:
+                    # Convert to datetime if it's not already
+                    date_col = pd.to_datetime(latest_data['date'])
+                    date_range = {
+                        "start": date_col.min().isoformat(),
+                        "end": date_col.max().isoformat()
+                    }
+                except Exception:
+                    # Fallback to string representation
+                    date_range = {
+                        "start": str(latest_data['date'].min()),
+                        "end": str(latest_data['date'].max())
+                    }
+            else:
+                date_range = {"start": None, "end": None}
             
             # Quality score
             quality_score = self.analyzer.get_data_quality_score(latest_data)

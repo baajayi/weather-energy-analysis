@@ -151,9 +151,41 @@ class DataProcessor:
         """
         if weather_df.empty or energy_df.empty:
             self.logger.warning("One or both DataFrames are empty for merging")
+            if weather_df.empty:
+                self.logger.warning("Weather DataFrame is empty")
+            if energy_df.empty:
+                self.logger.warning("Energy DataFrame is empty")
             return pd.DataFrame()
         
         try:
+            # Log merge key analysis
+            self.logger.info(f"Pre-merge analysis:")
+            self.logger.info(f"  Weather data: {len(weather_df)} records, {weather_df['city'].nunique()} cities")
+            self.logger.info(f"  Energy data: {len(energy_df)} records, {energy_df['city'].nunique()} cities")
+            
+            # Check for key overlaps
+            weather_cities = set(weather_df['city'].unique())
+            energy_cities = set(energy_df['city'].unique())
+            common_cities = weather_cities & energy_cities
+            
+            self.logger.info(f"  Weather cities: {sorted(weather_cities)}")
+            self.logger.info(f"  Energy cities: {sorted(energy_cities)}")
+            self.logger.info(f"  Common cities: {sorted(common_cities)}")
+            
+            if not common_cities:
+                self.logger.error("No common cities found between weather and energy data")
+                return pd.DataFrame()
+            
+            # Check date ranges
+            weather_dates = weather_df['date'].dt.date if hasattr(weather_df['date'], 'dt') else pd.to_datetime(weather_df['date']).dt.date
+            energy_dates = energy_df['date'].dt.date if hasattr(energy_df['date'], 'dt') else pd.to_datetime(energy_df['date']).dt.date
+            
+            weather_date_range = f"{weather_dates.min()} to {weather_dates.max()}"
+            energy_date_range = f"{energy_dates.min()} to {energy_dates.max()}"
+            
+            self.logger.info(f"  Weather date range: {weather_date_range}")
+            self.logger.info(f"  Energy date range: {energy_date_range}")
+            
             # Merge on city and date
             merged_df = pd.merge(
                 weather_df, 
@@ -162,6 +194,29 @@ class DataProcessor:
                 how='inner',
                 suffixes=('', '_energy')
             )
+            
+            # Log merge results
+            self.logger.info(f"Post-merge analysis:")
+            self.logger.info(f"  Merged records: {len(merged_df)}")
+            self.logger.info(f"  Merged cities: {merged_df['city'].nunique() if len(merged_df) > 0 else 0}")
+            
+            if len(merged_df) == 0:
+                self.logger.error("Merge resulted in zero records - investigating...")
+                # Check for potential key mismatches
+                for city in common_cities:
+                    weather_city_data = weather_df[weather_df['city'] == city]
+                    energy_city_data = energy_df[energy_df['city'] == city]
+                    
+                    weather_city_dates = set(weather_city_data['date'].dt.date if hasattr(weather_city_data['date'], 'dt') else pd.to_datetime(weather_city_data['date']).dt.date)
+                    energy_city_dates = set(energy_city_data['date'].dt.date if hasattr(energy_city_data['date'], 'dt') else pd.to_datetime(energy_city_data['date']).dt.date)
+                    
+                    common_dates = weather_city_dates & energy_city_dates
+                    self.logger.info(f"    {city}: {len(common_dates)} common dates")
+                    
+                    if len(common_dates) == 0:
+                        self.logger.warning(f"      No date overlap for {city}")
+                        self.logger.warning(f"      Weather dates: {sorted(list(weather_city_dates))[:5]}...")
+                        self.logger.warning(f"      Energy dates: {sorted(list(energy_city_dates))[:5]}...")
             
             # Remove duplicate columns
             duplicate_cols = ['state_energy', 'day_of_week_energy', 'is_weekend_energy']
@@ -172,7 +227,7 @@ class DataProcessor:
             # Sort by date and city
             merged_df = merged_df.sort_values(['date', 'city']).reset_index(drop=True)
             
-            self.logger.info(f"Merged data: {len(merged_df)} records")
+            self.logger.info(f"Final merged data: {len(merged_df)} records")
             return merged_df
             
         except Exception as e:
@@ -216,13 +271,29 @@ class DataProcessor:
                     self.logger.warning(f"Found {temp_outliers.sum()} temperature outliers")
                     cleaned_df = cleaned_df[~temp_outliers]
             
-            # Validate energy consumption
+            # Validate energy consumption - only remove negative values
             energy_min = self.quality_checks['energy']['min_consumption']
-            energy_outliers = cleaned_df['energy_consumption_mwh'] < energy_min
+            negative_energy = cleaned_df['energy_consumption_mwh'] < energy_min
             
-            if energy_outliers.any():
-                self.logger.warning(f"Found {energy_outliers.sum()} energy outliers")
-                cleaned_df = cleaned_df[~energy_outliers]
+            if negative_energy.any():
+                self.logger.warning(f"Found {negative_energy.sum()} negative energy values, removing them")
+                cleaned_df = cleaned_df[~negative_energy]
+            
+            # Use more conservative outlier detection for extremely high values
+            if 'energy_consumption_mwh' in cleaned_df.columns and len(cleaned_df) > 10:
+                # Use 3 standard deviations instead of IQR for less aggressive filtering
+                mean_energy = cleaned_df['energy_consumption_mwh'].mean()
+                std_energy = cleaned_df['energy_consumption_mwh'].std()
+                
+                # Only remove values more than 3 standard deviations from mean
+                extreme_outliers = cleaned_df['energy_consumption_mwh'] > (mean_energy + 3 * std_energy)
+                
+                if extreme_outliers.any():
+                    self.logger.warning(f"Found {extreme_outliers.sum()} extreme energy outliers (>3 std dev), removing them")
+                    self.logger.info(f"Energy stats - Mean: {mean_energy:.0f}, Std: {std_energy:.0f}, Threshold: {mean_energy + 3 * std_energy:.0f}")
+                    cleaned_df = cleaned_df[~extreme_outliers]
+                else:
+                    self.logger.info(f"No extreme energy outliers found using 3-sigma rule")
             
             # Remove duplicates
             cleaned_df = cleaned_df.drop_duplicates(subset=['date', 'city'])
@@ -410,3 +481,167 @@ class DataProcessor:
         
         self.logger.info("Completed data processing pipeline")
         return final_data
+    
+    def process_energy_only(self, energy_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Process energy data only when weather data is unavailable.
+        
+        Args:
+            energy_df: Raw energy DataFrame
+            
+        Returns:
+            Processed energy DataFrame
+        """
+        self.logger.info("Processing energy data only")
+        
+        # Process energy data
+        processed_energy = self.process_energy_data(energy_df)
+        
+        # Clean and validate (with modified validation for energy-only data)
+        cleaned_data = self.clean_and_validate_energy_only(processed_energy)
+        
+        # Save processed data
+        self.save_processed_data(cleaned_data)
+        
+        self.logger.info("Completed energy-only data processing")
+        return cleaned_data
+    
+    def process_weather_only(self, weather_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Process weather data only when energy data is unavailable.
+        
+        Args:
+            weather_df: Raw weather DataFrame
+            
+        Returns:
+            Processed weather DataFrame
+        """
+        self.logger.info("Processing weather data only")
+        
+        # Process weather data
+        processed_weather = self.process_weather_data(weather_df)
+        
+        # Clean and validate (with modified validation for weather-only data)
+        cleaned_data = self.clean_and_validate_weather_only(processed_weather)
+        
+        # Save processed data
+        self.save_processed_data(cleaned_data)
+        
+        self.logger.info("Completed weather-only data processing")
+        return cleaned_data
+    
+    def clean_and_validate_energy_only(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Clean and validate energy-only data.
+        
+        Args:
+            df: Energy DataFrame to clean
+            
+        Returns:
+            Cleaned DataFrame
+        """
+        if df.empty:
+            self.logger.warning("Empty DataFrame provided for energy-only cleaning")
+            return df
+        
+        try:
+            # Create a copy
+            cleaned_df = df.copy()
+            original_count = len(cleaned_df)
+            
+            # Remove records with missing essential data
+            essential_cols = ['date', 'city', 'energy_consumption_mwh']
+            cleaned_df = cleaned_df.dropna(subset=essential_cols)
+            
+            # Validate energy consumption - only remove negative values
+            energy_min = self.quality_checks['energy']['min_consumption']
+            negative_energy = cleaned_df['energy_consumption_mwh'] < energy_min
+            
+            if negative_energy.any():
+                self.logger.warning(f"Found {negative_energy.sum()} negative energy values, removing them")
+                cleaned_df = cleaned_df[~negative_energy]
+            
+            # Use more conservative outlier detection for extremely high values
+            if 'energy_consumption_mwh' in cleaned_df.columns and len(cleaned_df) > 10:
+                # Use 3 standard deviations instead of IQR for less aggressive filtering
+                mean_energy = cleaned_df['energy_consumption_mwh'].mean()
+                std_energy = cleaned_df['energy_consumption_mwh'].std()
+                
+                # Only remove values more than 3 standard deviations from mean
+                extreme_outliers = cleaned_df['energy_consumption_mwh'] > (mean_energy + 3 * std_energy)
+                
+                if extreme_outliers.any():
+                    self.logger.warning(f"Found {extreme_outliers.sum()} extreme energy outliers (>3 std dev), removing them")
+                    self.logger.info(f"Energy stats - Mean: {mean_energy:.0f}, Std: {std_energy:.0f}, Threshold: {mean_energy + 3 * std_energy:.0f}")
+                    cleaned_df = cleaned_df[~extreme_outliers]
+                else:
+                    self.logger.info(f"No extreme energy outliers found using 3-sigma rule")
+            
+            # Remove duplicates
+            cleaned_df = cleaned_df.drop_duplicates(subset=['date', 'city'])
+            
+            final_count = len(cleaned_df)
+            removed_count = original_count - final_count
+            
+            if removed_count > 0:
+                self.logger.info(f"Removed {removed_count} invalid records during energy-only cleaning")
+            
+            self.logger.info(f"Cleaned energy-only data: {final_count} records")
+            return cleaned_df
+            
+        except Exception as e:
+            self.logger.error(f"Error in energy-only data cleaning: {e}")
+            return pd.DataFrame()
+    
+    def clean_and_validate_weather_only(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Clean and validate weather-only data.
+        
+        Args:
+            df: Weather DataFrame to clean
+            
+        Returns:
+            Cleaned DataFrame
+        """
+        if df.empty:
+            self.logger.warning("Empty DataFrame provided for weather-only cleaning")
+            return df
+        
+        try:
+            # Create a copy
+            cleaned_df = df.copy()
+            original_count = len(cleaned_df)
+            
+            # Remove records with missing essential data
+            essential_cols = ['date', 'city', 'temp_avg_f']
+            cleaned_df = cleaned_df.dropna(subset=essential_cols)
+            
+            # Validate temperature ranges
+            if 'temp_avg_f' in cleaned_df.columns:
+                temp_min = self.quality_checks['temperature']['min_fahrenheit']
+                temp_max = self.quality_checks['temperature']['max_fahrenheit']
+                
+                temp_outliers = (
+                    (cleaned_df['temp_avg_f'] < temp_min) | 
+                    (cleaned_df['temp_avg_f'] > temp_max)
+                )
+                
+                if temp_outliers.any():
+                    self.logger.warning(f"Found {temp_outliers.sum()} temperature outliers")
+                    cleaned_df = cleaned_df[~temp_outliers]
+            
+            # Remove duplicates
+            cleaned_df = cleaned_df.drop_duplicates(subset=['date', 'city'])
+            
+            final_count = len(cleaned_df)
+            removed_count = original_count - final_count
+            
+            if removed_count > 0:
+                self.logger.info(f"Removed {removed_count} invalid records during weather-only cleaning")
+            
+            self.logger.info(f"Cleaned weather-only data: {final_count} records")
+            return cleaned_df
+            
+        except Exception as e:
+            self.logger.error(f"Error in weather-only data cleaning: {e}")
+            return pd.DataFrame()

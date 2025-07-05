@@ -365,6 +365,8 @@ class DataAnalyzer:
                         'energy_consumption_mwh': 'mean'
                     }).round(2)
                     
+                    # Convert Period index to string for JSON serialization
+                    monthly_summary.index = monthly_summary.index.astype(str)
                     summary["monthly_trends"] = monthly_summary.to_dict()
             
             return summary
@@ -392,8 +394,29 @@ class DataAnalyzer:
             filepath = logs_path / filename
             
             import json
+            import pandas as pd
+            
+            def json_serializer(obj):
+                """Custom JSON serializer for pandas objects."""
+                if isinstance(obj, pd.Period):
+                    return str(obj)
+                elif isinstance(obj, pd.Timestamp):
+                    return obj.isoformat()
+                elif isinstance(obj, pd.Timedelta):
+                    return str(obj)
+                elif isinstance(obj, (pd.Series, pd.DataFrame)):
+                    return obj.to_dict()
+                elif hasattr(obj, 'item'):  # numpy types
+                    return obj.item()
+                elif isinstance(obj, (np.int64, np.int32, np.float64, np.float32)):
+                    return obj.item()
+                elif pd.isna(obj):
+                    return None
+                else:
+                    return str(obj)
+            
             with open(filepath, 'w') as f:
-                json.dump(quality_data, f, indent=2, default=str)
+                json.dump(quality_data, f, indent=2, default=json_serializer)
             
             self.logger.info(f"Quality report saved to {filepath}")
             
