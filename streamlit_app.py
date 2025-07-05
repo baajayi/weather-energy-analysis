@@ -23,9 +23,32 @@ st.set_page_config(
 )
 
 @st.cache_data
-def load_sample_data():
-    """Load sample data for demonstration."""
-    # Create sample data that matches our pipeline output structure
+def load_production_data():
+    """Load real processed data from the pipeline."""
+    try:
+        # Try to load the latest processed data file
+        processed_data_path = Path("data/processed")
+        
+        if processed_data_path.exists():
+            # Find the most recent processed data file
+            csv_files = list(processed_data_path.glob("processed_data_*.csv"))
+            
+            if csv_files:
+                latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
+                df = pd.read_csv(latest_file)
+                df['date'] = pd.to_datetime(df['date'])
+                return df, "production"
+        
+        # If no processed data, fall back to demo data
+        return load_demo_data(), "demo"
+        
+    except Exception as e:
+        st.error(f"Error loading production data: {e}")
+        return load_demo_data(), "demo"
+
+@st.cache_data
+def load_demo_data():
+    """Load sample data for demonstration when production data unavailable."""
     np.random.seed(42)
     
     cities = [
@@ -336,11 +359,17 @@ def main():
     st.markdown("---")
     
     # Load data
-    data = load_sample_data()
+    data, data_mode = load_production_data()
     
     # Sidebar
     st.sidebar.header("Dashboard Controls")
-    st.sidebar.markdown("**Demo Mode**: Using simulated data for demonstration")
+    
+    if data_mode == "production":
+        st.sidebar.markdown("**🚀 Production Mode**: Using real pipeline data")
+        st.sidebar.success("Live data from NOAA & EIA APIs")
+    else:
+        st.sidebar.markdown("**🎭 Demo Mode**: Using simulated data for demonstration")
+        st.sidebar.info("Deploy with processed data for production mode")
     
     # Date range selector
     min_date = data['date'].min().date()
@@ -389,7 +418,14 @@ def main():
         
         # About section
         with st.expander("About This Dashboard"):
-            st.markdown("""
+            if data_mode == "production":
+                data_info = "**📊 Data Source**: Real data from NOAA Climate Data Online and EIA Energy APIs"
+            else:
+                data_info = "**🎭 Data Source**: Simulated data based on realistic weather-energy correlation patterns"
+                
+            st.markdown(f"""
+            {data_info}
+            
             This dashboard demonstrates a production-ready data pipeline for analyzing the relationship 
             between weather patterns and energy consumption across 5 major US cities:
             
