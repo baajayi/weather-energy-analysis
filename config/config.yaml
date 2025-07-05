@@ -1,0 +1,101 @@
+# Configuration for Weather and Energy Analysis Pipeline
+
+# API Configuration
+api:
+  noaa:
+    base_url: "https://www.ncei.noaa.gov/cdo-web/api/v2"
+    token: "GlgHRWybAdVcAMnEROnbTnmGBSLwvkRQ"  # Get from https://www.ncdc.noaa.gov/cdo-web/token
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1
+  
+  eia:
+    base_url: "https://api.eia.gov/v2/electricity/rto/daily-region-data/data/"
+    api_key: "kUgx8GnkbIQXsmTzfQT7g4d7TG3X0XqhYBCWBmMr"  # Get from https://www.eia.gov/opendata/register.php
+    timeout: 30
+    retry_attempts: 3
+    retry_delay: 1
+
+# City Configuration
+cities:
+  - name: "New York"
+    state: "New York"
+    noaa_station_id: "GHCND:USW00094728"
+    eia_region_code: "NYIS"
+    lat: 40.7128
+    lon: -74.0060
+  
+  - name: "Chicago"
+    state: "Illinois"
+    noaa_station_id: "GHCND:USW00094846"
+    eia_region_code: "PJM"
+    lat: 41.8781
+    lon: -87.6298
+  
+  - name: "Houston"
+    state: "Texas"
+    noaa_station_id: "GHCND:USW00012960"
+    eia_region_code: "ERCO"
+    lat: 29.7604
+    lon: -95.3698
+  
+  - name: "Phoenix"
+    state: "Arizona"
+    noaa_station_id: "GHCND:USW00023183"
+    eia_region_code: "AZPS"
+    lat: 33.4484
+    lon: -112.0740
+  
+  - name: "Seattle"
+    state: "Washington"
+    noaa_station_id: "GHCND:USW00024233"
+    eia_region_code: "SCL"
+    lat: 47.6062
+    lon: -122.3321
+
+# Data Collection Settings
+data:
+  historical_days: 90
+  data_types:
+    - "TMAX"  # Maximum temperature
+    - "TMIN"  # Minimum temperature
+  
+  # Data quality thresholds
+  quality_checks:
+    temperature:
+      min_fahrenheit: -50
+      max_fahrenheit: 130
+    energy:
+      min_consumption: 0  # No negative energy consumption
+    
+    # Data freshness threshold (hours)
+    freshness_threshold: 24
+
+# File paths
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  logs: "logs"
+  
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/pipeline.log"
+  
+# Dashboard settings
+dashboard:
+  title: "US Weather & Energy Analysis Dashboard"
+  page_icon: "⚡"
+  layout: "wide"
+  
+  # Map settings
+  map:
+    initial_zoom: 4
+    center_lat: 39.8283
+    center_lon: -98.5795
+    
+  # Chart settings
+  charts:
+    height: 500
+    color_palette: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]

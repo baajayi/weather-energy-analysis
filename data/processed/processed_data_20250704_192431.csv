@@ -1,0 +1,2 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2024-01-01,Test City,Test State,40.0,-74.0,77.0,59.0,68.0,Monday,False,60-70°F,TEST,1000.0,,,
