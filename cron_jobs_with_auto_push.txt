@@ -1,13 +1,20 @@
 # Weather and Energy Analysis Pipeline Cron Jobs with Auto Dashboard Updates
+# Updated with enhanced error handling and explicit config paths
 # 
 # Daily data collection at 6:00 AM every day
-0 6 * * * cd /home/bam/data_science_project && python src/pipeline.py --mode daily >> logs/cron_daily.log 2>&1
+0 6 * * * cd /home/bam/data_science_project && python src/pipeline.py --mode daily --config config/config.yaml >> logs/cron_daily.log 2>&1
 
 # Automated dashboard update at 6:30 AM (30 minutes after data collection)
 30 6 * * * /home/bam/data_science_project/scripts/update_dashboard.sh >> logs/cron_dashboard_update.log 2>&1
 
 # Weekly quality check on Sundays at 7:00 AM
-0 7 * * 0 cd /home/bam/data_science_project && python src/pipeline.py --mode quality-check >> logs/cron_quality.log 2>&1
+0 7 * * 0 cd /home/bam/data_science_project && python src/pipeline.py --mode quality-check --config config/config.yaml >> logs/cron_quality.log 2>&1
 
-# Monthly historical backfill on the 1st of each month at 8:00 AM (optional)
-0 8 1 * * cd /home/bam/data_science_project && python src/pipeline.py --mode historical --days 30 >> logs/cron_monthly.log 2>&1
+# Monthly historical backfill on the 1st of each month at 8:00 AM (30 days)
+0 8 1 * * cd /home/bam/data_science_project && python src/pipeline.py --mode historical --days 30 --config config/config.yaml >> logs/cron_monthly.log 2>&1
+
+# Alternative: Use test config for development/testing (comment out above and uncomment below)
+# 0 6 * * * cd /home/bam/data_science_project && python src/pipeline.py --mode daily --config config/config_test.yaml >> logs/cron_daily_test.log 2>&1
+
+# Optional: Weekly monitoring report on Saturdays at 8:00 AM (uncomment to enable)
+# 0 8 * * 6 cd /home/bam/data_science_project && ./scripts/monitor_cron_jobs.sh >> logs/cron_monitoring.log 2>&1

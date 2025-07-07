@@ -5,8 +5,8 @@ Data processing module for cleaning and transforming weather and energy data.
 import pandas as pd
 import numpy as np
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from datetime import datetime
+from typing import Dict, Optional
 import yaml
 from pathlib import Path
 
@@ -137,6 +137,74 @@ class DataProcessor:
             self.logger.error(f"Error processing energy data: {e}")
             return pd.DataFrame()
     
+    def _diagnose_merge_compatibility(self, weather_df: pd.DataFrame, 
+                                     energy_df: pd.DataFrame) -> Dict[str, any]:
+        """
+        Diagnose merge compatibility between weather and energy data.
+        
+        Args:
+            weather_df: Processed weather DataFrame
+            energy_df: Processed energy DataFrame
+            
+        Returns:
+            Dictionary with diagnostic information
+        """
+        diagnosis = {
+            'compatible': False,
+            'common_cities': [],
+            'date_overlaps': {},
+            'total_possible_matches': 0,
+            'issues': []
+        }
+        
+        try:
+            # Check for key overlaps
+            weather_cities = set(weather_df['city'].unique())
+            energy_cities = set(energy_df['city'].unique())
+            common_cities = weather_cities & energy_cities
+            diagnosis['common_cities'] = sorted(common_cities)
+            
+            if not common_cities:
+                diagnosis['issues'].append("No common cities found between datasets")
+                return diagnosis
+            
+            # Check date overlaps for each common city
+            total_overlaps = 0
+            for city in common_cities:
+                weather_city_data = weather_df[weather_df['city'] == city]
+                energy_city_data = energy_df[energy_df['city'] == city]
+                
+                weather_dates = set(pd.to_datetime(weather_city_data['date']).dt.date)
+                energy_dates = set(pd.to_datetime(energy_city_data['date']).dt.date)
+                
+                common_dates = weather_dates & energy_dates
+                overlap_count = len(common_dates)
+                total_overlaps += overlap_count
+                
+                diagnosis['date_overlaps'][city] = {
+                    'weather_dates': len(weather_dates),
+                    'energy_dates': len(energy_dates),
+                    'common_dates': overlap_count,
+                    'weather_range': f"{min(weather_dates)} to {max(weather_dates)}" if weather_dates else "No dates",
+                    'energy_range': f"{min(energy_dates)} to {max(energy_dates)}" if energy_dates else "No dates",
+                    'sample_common_dates': sorted(list(common_dates))[:5] if common_dates else []
+                }
+                
+                if overlap_count == 0:
+                    diagnosis['issues'].append(f"No date overlap for {city}")
+            
+            diagnosis['total_possible_matches'] = total_overlaps
+            diagnosis['compatible'] = total_overlaps > 0
+            
+            if total_overlaps == 0:
+                diagnosis['issues'].append("No date overlaps found for any city")
+            
+            return diagnosis
+            
+        except Exception as e:
+            diagnosis['issues'].append(f"Error during compatibility diagnosis: {e}")
+            return diagnosis
+
     def merge_weather_energy_data(self, weather_df: pd.DataFrame, 
                                  energy_df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -158,33 +226,34 @@ class DataProcessor:
             return pd.DataFrame()
         
         try:
-            # Log merge key analysis
+            # Run comprehensive merge diagnostics
+            self.logger.info("Running merge compatibility diagnostics...")
+            diagnosis = self._diagnose_merge_compatibility(weather_df, energy_df)
+            
+            # Log diagnostic results
             self.logger.info(f"Pre-merge analysis:")
             self.logger.info(f"  Weather data: {len(weather_df)} records, {weather_df['city'].nunique()} cities")
             self.logger.info(f"  Energy data: {len(energy_df)} records, {energy_df['city'].nunique()} cities")
+            self.logger.info(f"  Common cities: {diagnosis['common_cities']}")
+            self.logger.info(f"  Expected merge matches: {diagnosis['total_possible_matches']}")
             
-            # Check for key overlaps
-            weather_cities = set(weather_df['city'].unique())
-            energy_cities = set(energy_df['city'].unique())
-            common_cities = weather_cities & energy_cities
+            # Log detailed date overlap information
+            for city, overlap_info in diagnosis['date_overlaps'].items():
+                self.logger.info(f"  {city}:")
+                self.logger.info(f"    Weather: {overlap_info['weather_dates']} records ({overlap_info['weather_range']})")
+                self.logger.info(f"    Energy: {overlap_info['energy_dates']} records ({overlap_info['energy_range']})")
+                self.logger.info(f"    Common dates: {overlap_info['common_dates']}")
+                if overlap_info['sample_common_dates']:
+                    self.logger.info(f"    Sample overlap: {overlap_info['sample_common_dates']}")
             
-            self.logger.info(f"  Weather cities: {sorted(weather_cities)}")
-            self.logger.info(f"  Energy cities: {sorted(energy_cities)}")
-            self.logger.info(f"  Common cities: {sorted(common_cities)}")
+            # Report any issues found
+            if diagnosis['issues']:
+                for issue in diagnosis['issues']:
+                    self.logger.warning(f"  Issue: {issue}")
             
-            if not common_cities:
-                self.logger.error("No common cities found between weather and energy data")
+            if not diagnosis['compatible']:
+                self.logger.error("Merge not compatible - no date overlaps found")
                 return pd.DataFrame()
-            
-            # Check date ranges
-            weather_dates = weather_df['date'].dt.date if hasattr(weather_df['date'], 'dt') else pd.to_datetime(weather_df['date']).dt.date
-            energy_dates = energy_df['date'].dt.date if hasattr(energy_df['date'], 'dt') else pd.to_datetime(energy_df['date']).dt.date
-            
-            weather_date_range = f"{weather_dates.min()} to {weather_dates.max()}"
-            energy_date_range = f"{energy_dates.min()} to {energy_dates.max()}"
-            
-            self.logger.info(f"  Weather date range: {weather_date_range}")
-            self.logger.info(f"  Energy date range: {energy_date_range}")
             
             # Merge on city and date
             merged_df = pd.merge(
@@ -201,22 +270,8 @@ class DataProcessor:
             self.logger.info(f"  Merged cities: {merged_df['city'].nunique() if len(merged_df) > 0 else 0}")
             
             if len(merged_df) == 0:
-                self.logger.error("Merge resulted in zero records - investigating...")
-                # Check for potential key mismatches
-                for city in common_cities:
-                    weather_city_data = weather_df[weather_df['city'] == city]
-                    energy_city_data = energy_df[energy_df['city'] == city]
-                    
-                    weather_city_dates = set(weather_city_data['date'].dt.date if hasattr(weather_city_data['date'], 'dt') else pd.to_datetime(weather_city_data['date']).dt.date)
-                    energy_city_dates = set(energy_city_data['date'].dt.date if hasattr(energy_city_data['date'], 'dt') else pd.to_datetime(energy_city_data['date']).dt.date)
-                    
-                    common_dates = weather_city_dates & energy_city_dates
-                    self.logger.info(f"    {city}: {len(common_dates)} common dates")
-                    
-                    if len(common_dates) == 0:
-                        self.logger.warning(f"      No date overlap for {city}")
-                        self.logger.warning(f"      Weather dates: {sorted(list(weather_city_dates))[:5]}...")
-                        self.logger.warning(f"      Energy dates: {sorted(list(energy_city_dates))[:5]}...")
+                self.logger.error("Merge resulted in zero records despite compatibility check - this should not happen!")
+                # The diagnostic function should have caught this earlier
             
             # Remove duplicate columns
             duplicate_cols = ['state_energy', 'day_of_week_energy', 'is_weekend_energy']
