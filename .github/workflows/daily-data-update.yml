@@ -24,18 +24,41 @@ jobs:
       run: |
         pip install -r requirements.txt
         
+    - name: Clear Python cache
+      run: |
+        find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+        find . -name "*.pyc" -delete 2>/dev/null || true
+        
     - name: Configure API keys
       env:
         NOAA_TOKEN: ${{ secrets.NOAA_TOKEN }}
         EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
       run: |
-        # Update config with secrets
-        sed -i "s/YOUR_NOAA_TOKEN_HERE/$NOAA_TOKEN/" config/config.yaml
-        sed -i "s/YOUR_EIA_API_KEY_HERE/$EIA_API_KEY/" config/config.yaml
+        # Create runtime config with secrets (use config_test.yaml as template)
+        cp config/config_test.yaml config/config_runtime.yaml
+        # Replace the test credentials with production secrets
+        sed -i "s/GlgHRWybAdVcAMnEROnbTnmGBSLwvkRQ/$NOAA_TOKEN/" config/config_runtime.yaml
+        sed -i "s/kUgx8GnkbIQXsmTzfQT7g4d7TG3X0XqhYBCWBmMr/$EIA_API_KEY/" config/config_runtime.yaml
         
     - name: Run daily data pipeline
+      timeout-minutes: 15
       run: |
-        python src/pipeline.py --mode daily
+        echo "Starting pipeline with date alignment fixes..."
+        python src/pipeline.py --mode daily --config config/config_runtime.yaml
+        echo "Pipeline completed. Checking results..."
+        ls -la data/processed/
+        
+    - name: Check data quality
+      run: |
+        if [ -f data/processed/processed_data_*.csv ]; then
+          latest_file=$(ls -t data/processed/processed_data_*.csv | head -1)
+          echo "Latest processed file: $latest_file"
+          echo "Record count: $(tail -n +2 "$latest_file" | wc -l)"
+          echo "Cities in data: $(tail -n +2 "$latest_file" | cut -d',' -f2 | sort | uniq | tr '\n' ', ')"
+        else
+          echo "No processed data files found!"
+          exit 1
+        fi
         
     - name: Commit and push data updates
       run: |
