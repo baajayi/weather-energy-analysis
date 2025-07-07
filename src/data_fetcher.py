@@ -307,29 +307,43 @@ class DataFetcher:
         Fetch data for recent days with lag for weather data availability.
         Weather data typically has a 2-3 day reporting delay.
         
+        FIXED VERSION: Both APIs use identical date ranges to ensure data overlap.
+        
         Returns:
             Dictionary containing weather and energy DataFrames
         """
         try:
             today = datetime.now()
+            self.logger.info(f"FETCH_DAILY_DATA: Starting with today = {today}")
             
-            # Use consistent 4-day lag for both APIs to ensure overlap
+            # CRITICAL FIX: Use consistent 4-day lag for both APIs to ensure overlap
             # This accounts for weather data reporting delays
-            end_date = today - timedelta(days=4)
-            start_date = end_date - timedelta(days=2)
+            base_end_date = today - timedelta(days=4)
+            base_start_date = base_end_date - timedelta(days=2)
             
-            # Use same date ranges for both weather and energy
-            weather_end_date = end_date
-            weather_start_date = start_date
-            energy_end_date = end_date
-            energy_start_date = start_date
+            self.logger.info(f"FETCH_DAILY_DATA: Calculated base date range: {base_start_date.strftime('%Y-%m-%d')} to {base_end_date.strftime('%Y-%m-%d')}")
             
+            # ENFORCE: Both APIs use IDENTICAL date ranges
+            weather_start_date = base_start_date
+            weather_end_date = base_end_date
+            energy_start_date = base_start_date  # SAME as weather
+            energy_end_date = base_end_date      # SAME as weather
+            
+            # Convert to strings
             weather_start_str = weather_start_date.strftime('%Y-%m-%d')
             weather_end_str = weather_end_date.strftime('%Y-%m-%d')
             energy_start_str = energy_start_date.strftime('%Y-%m-%d')
             energy_end_str = energy_end_date.strftime('%Y-%m-%d')
             
-            self.logger.info(f"Fetching daily data with aligned date ranges - Both APIs: {weather_start_str} to {weather_end_str}")
+            # VERIFICATION: Log the ranges to confirm alignment
+            self.logger.info(f"FETCH_DAILY_DATA: Weather API will use: {weather_start_str} to {weather_end_str}")
+            self.logger.info(f"FETCH_DAILY_DATA: Energy API will use:  {energy_start_str} to {energy_end_str}")
+            
+            if weather_start_str != energy_start_str or weather_end_str != energy_end_str:
+                self.logger.error("CRITICAL ERROR: Date ranges are not aligned!")
+                raise ValueError("Date range alignment verification failed")
+            else:
+                self.logger.info("FETCH_DAILY_DATA: ✅ Date ranges verified as IDENTICAL")
             
             # Initialize empty dataframes in case of failures
             weather_data = pd.DataFrame()
@@ -369,23 +383,28 @@ class DataFetcher:
             if not weather_available and not energy_available:
                 self.logger.warning("No data available from either weather or energy sources")
             
+            # FINAL VERIFICATION: Ensure return values are aligned
+            aligned_range = f"{weather_start_str} to {weather_end_str}"
+            self.logger.info(f"FETCH_DAILY_DATA: Returning aligned date range: {aligned_range}")
+            
             return {
                 'weather': weather_data,
                 'energy': energy_data,
                 'date': today.strftime('%Y-%m-%d'),
-                'weather_date_range': f"{weather_start_str} to {weather_end_str}",
-                'energy_date_range': f"{energy_start_str} to {energy_end_str}"
+                'weather_date_range': aligned_range,
+                'energy_date_range': aligned_range  # GUARANTEED to be identical
             }
             
         except Exception as e:
             self.logger.error(f"Critical error in fetch_daily_data: {e}")
             # Return empty data structure to prevent pipeline crash
+            error_range = "ERROR"
             return {
                 'weather': pd.DataFrame(),
                 'energy': pd.DataFrame(),
                 'date': datetime.now().strftime('%Y-%m-%d'),
-                'weather_date_range': "N/A",
-                'energy_date_range': "N/A"
+                'weather_date_range': error_range,
+                'energy_date_range': error_range  # Keep aligned even in error case
             }
     
     def save_raw_data(self, data: Dict[str, pd.DataFrame], prefix: str = "raw"):
