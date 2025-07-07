@@ -24,10 +24,21 @@ jobs:
       run: |
         pip install -r requirements.txt
         
-    - name: Clear Python cache
+    - name: Clear Python cache and force fresh environment
       run: |
         find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         find . -name "*.pyc" -delete 2>/dev/null || true
+        
+    - name: Verify we have the latest code
+      run: |
+        echo "Current commit: $(git rev-parse HEAD)"
+        echo "Checking for definitive fix markers..."
+        if grep -q "FETCH_DAILY_DATA: Starting with today" src/data_fetcher.py; then
+          echo "✅ GOOD: Definitive fix found in code"
+        else
+          echo "❌ BAD: Definitive fix NOT found - using old code"
+          exit 1
+        fi
         
     - name: Configure API keys
       env:
