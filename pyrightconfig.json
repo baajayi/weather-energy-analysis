@@ -1,0 +1,24 @@
+{
+    "include": [
+        "src",
+        "dashboards", 
+        "tests",
+        "scripts"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "data",
+        "logs",
+        ".git"
+    ],
+    "extraPaths": [
+        "./src"
+    ],
+    "pythonVersion": "3.9",
+    "pythonPlatform": "Linux",
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "reportMissingImports": "warning",
+    "reportMissingTypeStubs": false
+}

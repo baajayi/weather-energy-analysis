@@ -11,14 +11,16 @@ import numpy as np
 import sys
 from pathlib import Path
 import yaml
-import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-# Add the src directory to the path
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+# Add the project root and src directory to the path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / "src"))
 
-from data_processor import DataProcessor
-from analysis import DataAnalyzer
+# Import from src package
+from src.data_processor import DataProcessor
+from src.analysis import DataAnalyzer
 
 
 def load_config(config_path: str = "config/config.yaml"):
