@@ -60,21 +60,39 @@ jobs:
         ls -la data/processed/
         
     - name: Check data quality
+      shell: bash
       run: |
-        if [ -f data/processed/processed_data_*.csv ]; then
-          latest_file=$(ls -t data/processed/processed_data_*.csv | head -1)
-          echo "Latest processed file: $latest_file"
-          echo "Record count: $(tail -n +2 "$latest_file" | wc -l)"
-          echo "Cities in data: $(tail -n +2 "$latest_file" | cut -d',' -f2 | sort | uniq | tr '\n' ', ')"
-        else
+        set -euo pipefail
+        shopt -s nullglob
+
+        files=(data/processed/processed_data_*.csv)
+
+        if (( ${#files[@]} == 0 )); then
           echo "No processed data files found!"
           exit 1
         fi
+
+        # Pick the most recent by mtime
+        IFS=$'\n' read -r -d '' -a sorted < <(ls -1t "${files[@]}" && printf '\0')
+        latest_file="${sorted[0]}"
+
+        echo "Latest processed file: $latest_file"
+        # Record count minus header
+        echo "Record count: $(( $(wc -l < "$latest_file") - 1 ))"
+        echo -n "Cities in data: "
+        tail -n +2 "$latest_file" | cut -d',' -f2 | sort -u | tr '\n' ', '
+        echo
         
     - name: Commit and push data updates
+      shell: bash
       run: |
+        set -euo pipefail
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add data/processed/*.csv
-        git commit -m "Automated daily data update $(date)" || exit 0
+        git add data/processed/*.csv || true
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+          exit 0
+        fi
+        git commit -m "Automated daily data update $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
         git push
