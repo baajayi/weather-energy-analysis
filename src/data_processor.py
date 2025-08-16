@@ -700,3 +700,230 @@ class DataProcessor:
         except Exception as e:
             self.logger.error(f"Error in weather-only data cleaning: {e}")
             return pd.DataFrame()
+    
+    def validate_data_integrity(self, df: pd.DataFrame) -> Dict[str, any]:
+        """
+        Comprehensive data integrity validation with detailed reporting.
+        
+        Args:
+            df: DataFrame to validate
+            
+        Returns:
+            Dictionary with validation results and integrity score
+        """
+        validation_results = {
+            'total_records': len(df),
+            'validation_timestamp': datetime.now().isoformat(),
+            'checks': {},
+            'warnings': [],
+            'errors': [],
+            'integrity_score': 0.0
+        }
+        
+        if df.empty:
+            validation_results['errors'].append("Dataset is empty")
+            validation_results['integrity_score'] = 0.0
+            return validation_results
+        
+        try:
+            # 1. Required columns check
+            required_cols = ['date', 'city', 'state']
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            if missing_cols:
+                validation_results['errors'].append(f"Missing required columns: {missing_cols}")
+            else:
+                validation_results['checks']['required_columns'] = 'PASS'
+            
+            # 2. Date validity check
+            if 'date' in df.columns:
+                try:
+                    date_series = pd.to_datetime(df['date'])
+                    null_dates = date_series.isnull().sum()
+                    future_dates = (date_series > datetime.now()).sum()
+                    
+                    if null_dates > 0:
+                        validation_results['warnings'].append(f"{null_dates} records with invalid dates")
+                    if future_dates > 0:
+                        validation_results['warnings'].append(f"{future_dates} records with future dates")
+                    
+                    validation_results['checks']['date_validity'] = 'PASS' if null_dates == 0 and future_dates == 0 else 'WARNING'
+                    validation_results['checks']['date_range'] = {
+                        'earliest': date_series.min().isoformat() if not date_series.isnull().all() else None,
+                        'latest': date_series.max().isoformat() if not date_series.isnull().all() else None
+                    }
+                except Exception as e:
+                    validation_results['errors'].append(f"Date validation failed: {e}")
+                    validation_results['checks']['date_validity'] = 'FAIL'
+            
+            # 3. Temperature data validation
+            temp_cols = ['temp_max_f', 'temp_min_f', 'temp_avg_f']
+            for col in temp_cols:
+                if col in df.columns:
+                    temp_data = df[col].dropna()
+                    if len(temp_data) > 0:
+                        out_of_range = temp_data[(temp_data < -50) | (temp_data > 130)]
+                        null_temps = df[col].isnull().sum()
+                        
+                        if len(out_of_range) > 0:
+                            validation_results['warnings'].append(f"{len(out_of_range)} {col} values outside realistic range (-50°F to 130°F)")
+                        if null_temps > 0:
+                            validation_results['warnings'].append(f"{null_temps} missing {col} values")
+                        
+                        validation_results['checks'][f'{col}_validity'] = 'PASS' if len(out_of_range) == 0 else 'WARNING'
+                        validation_results['checks'][f'{col}_stats'] = {
+                            'min': float(temp_data.min()),
+                            'max': float(temp_data.max()),
+                            'mean': float(temp_data.mean()),
+                            'null_count': int(null_temps)
+                        }
+            
+            # 4. Energy data validation
+            energy_cols = ['value', 'energy_consumption_mwh']
+            for col in energy_cols:
+                if col in df.columns:
+                    energy_data = df[col].dropna()
+                    if len(energy_data) > 0:
+                        negative_energy = energy_data[energy_data < 0]
+                        null_energy = df[col].isnull().sum()
+                        
+                        if len(negative_energy) > 0:
+                            validation_results['errors'].append(f"{len(negative_energy)} negative {col} values found")
+                        if null_energy > 0:
+                            validation_results['warnings'].append(f"{null_energy} missing {col} values")
+                        
+                        validation_results['checks'][f'{col}_validity'] = 'PASS' if len(negative_energy) == 0 else 'FAIL'
+                        validation_results['checks'][f'{col}_stats'] = {
+                            'min': float(energy_data.min()),
+                            'max': float(energy_data.max()),
+                            'mean': float(energy_data.mean()),
+                            'null_count': int(null_energy)
+                        }
+            
+            # 5. Duplicate records check
+            if len(required_cols) > 0 and all(col in df.columns for col in required_cols):
+                key_cols = required_cols + (['date'] if 'date' in df.columns else [])
+                duplicates = df.duplicated(subset=key_cols).sum()
+                if duplicates > 0:
+                    validation_results['warnings'].append(f"{duplicates} duplicate records found")
+                validation_results['checks']['duplicates'] = 'PASS' if duplicates == 0 else 'WARNING'
+            
+            # 6. City coverage check
+            if 'city' in df.columns:
+                unique_cities = df['city'].nunique()
+                expected_cities = len(self.config.get('cities', []))
+                
+                validation_results['checks']['city_coverage'] = {
+                    'unique_cities': int(unique_cities),
+                    'expected_cities': expected_cities,
+                    'coverage_percentage': round((unique_cities / expected_cities * 100), 1) if expected_cities > 0 else 0
+                }
+                
+                if unique_cities < expected_cities:
+                    validation_results['warnings'].append(f"Only {unique_cities} of {expected_cities} expected cities present")
+            
+            # 7. Data freshness check
+            if 'date' in df.columns:
+                try:
+                    latest_date = pd.to_datetime(df['date']).max()
+                    days_old = (datetime.now() - latest_date).days
+                    freshness_threshold = self.config.get('data', {}).get('quality_checks', {}).get('freshness_threshold', 24) / 24  # Convert hours to days
+                    
+                    validation_results['checks']['data_freshness'] = {
+                        'latest_date': latest_date.isoformat(),
+                        'days_old': days_old,
+                        'is_fresh': days_old <= freshness_threshold
+                    }
+                    
+                    if days_old > freshness_threshold:
+                        validation_results['warnings'].append(f"Data is {days_old} days old (threshold: {freshness_threshold} days)")
+                except Exception:
+                    validation_results['warnings'].append("Could not determine data freshness")
+            
+            # Calculate overall integrity score
+            total_checks = len([v for v in validation_results['checks'].values() if isinstance(v, str)])
+            passed_checks = sum(1 for check in validation_results['checks'].values() 
+                              if isinstance(check, str) and check == 'PASS')
+            warning_checks = sum(1 for check in validation_results['checks'].values() 
+                               if isinstance(check, str) and check == 'WARNING')
+            
+            if total_checks > 0:
+                base_score = (passed_checks / total_checks) * 100
+                warning_penalty = (warning_checks / total_checks) * 20  # 20% penalty per warning
+                error_penalty = len(validation_results['errors']) * 30  # 30% penalty per error
+                
+                validation_results['integrity_score'] = max(0, base_score - warning_penalty - error_penalty)
+            
+            self.logger.info(f"Data integrity validation completed. Score: {validation_results['integrity_score']:.1f}/100")
+            
+            return validation_results
+            
+        except Exception as e:
+            self.logger.error(f"Error during data integrity validation: {e}")
+            validation_results['errors'].append(f"Validation process failed: {str(e)}")
+            validation_results['integrity_score'] = 0.0
+            return validation_results
+    
+    def cleanup_old_files(self, retention_days: int = 30) -> Dict[str, any]:
+        """
+        Clean up old processed data files to manage storage.
+        
+        Args:
+            retention_days: Number of days to retain files
+            
+        Returns:
+            Dictionary with cleanup results
+        """
+        cleanup_results = {
+            'files_removed': [],
+            'files_retained': [],
+            'space_freed_mb': 0.0,
+            'cleanup_timestamp': datetime.now().isoformat()
+        }
+        
+        try:
+            processed_path = Path(self.config['paths']['processed_data'])
+            
+            if not processed_path.exists():
+                self.logger.info("No processed data directory found for cleanup")
+                return cleanup_results
+            
+            cutoff_date = datetime.now() - timedelta(days=retention_days)
+            csv_files = list(processed_path.glob("processed_data_*.csv"))
+            
+            for file_path in csv_files:
+                try:
+                    file_mod_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+                    file_size_mb = file_path.stat().st_size / (1024 * 1024)
+                    
+                    if file_mod_time < cutoff_date:
+                        # File is older than retention period
+                        file_path.unlink()
+                        cleanup_results['files_removed'].append({
+                            'filename': file_path.name,
+                            'size_mb': round(file_size_mb, 2),
+                            'age_days': (datetime.now() - file_mod_time).days
+                        })
+                        cleanup_results['space_freed_mb'] += file_size_mb
+                        self.logger.info(f"Removed old file: {file_path.name} ({file_size_mb:.2f} MB)")
+                    else:
+                        # File is within retention period
+                        cleanup_results['files_retained'].append({
+                            'filename': file_path.name,
+                            'size_mb': round(file_size_mb, 2),
+                            'age_days': (datetime.now() - file_mod_time).days
+                        })
+                        
+                except Exception as e:
+                    self.logger.warning(f"Error processing file {file_path}: {e}")
+                    continue
+            
+            cleanup_results['space_freed_mb'] = round(cleanup_results['space_freed_mb'], 2)
+            
+            self.logger.info(f"File cleanup completed. Removed {len(cleanup_results['files_removed'])} files, "
+                           f"freed {cleanup_results['space_freed_mb']} MB")
+            
+            return cleanup_results
+            
+        except Exception as e:
+            self.logger.error(f"Error during file cleanup: {e}")
+            return cleanup_results

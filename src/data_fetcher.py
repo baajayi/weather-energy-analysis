@@ -426,3 +426,256 @@ class DataFetcher:
                 filepath = raw_data_path / filename
                 df.to_csv(filepath, index=False)
                 self.logger.info(f"Saved {data_type} data to {filepath}")
+    
+    def get_cached_data(self, days_back: int = 7) -> Dict[str, pd.DataFrame]:
+        """
+        Retrieve cached/historical data from processed files as fallback.
+        
+        Args:
+            days_back: Number of days to look back for cached data
+            
+        Returns:
+            Dictionary containing cached weather and energy data
+        """
+        try:
+            processed_path = Path(self.config['paths']['processed_data'])
+            
+            if not processed_path.exists():
+                self.logger.warning("No processed data directory found")
+                return {'weather': pd.DataFrame(), 'energy': pd.DataFrame()}
+            
+            # Get all processed CSV files sorted by modification time (newest first)
+            csv_files = sorted(
+                processed_path.glob("processed_data_*.csv"),
+                key=lambda x: x.stat().st_mtime,
+                reverse=True
+            )
+            
+            if not csv_files:
+                self.logger.warning("No processed data files found for fallback")
+                return {'weather': pd.DataFrame(), 'energy': pd.DataFrame()}
+            
+            # Load the most recent file
+            latest_file = csv_files[0]
+            self.logger.info(f"Loading cached data from {latest_file}")
+            
+            cached_df = pd.read_csv(latest_file)
+            
+            # Convert date column to datetime for filtering
+            cached_df['date'] = pd.to_datetime(cached_df['date'])
+            
+            # Filter for recent data within the days_back window
+            cutoff_date = datetime.now() - timedelta(days=days_back)
+            recent_data = cached_df[cached_df['date'] >= cutoff_date]
+            
+            # Separate weather and energy columns (simplified separation)
+            weather_cols = ['date', 'city', 'state', 'lat', 'lon', 'temp_max_f', 'temp_min_f', 'temp_avg_f']
+            energy_cols = ['date', 'city', 'state', 'eia_region', 'value']
+            
+            weather_data = recent_data[weather_cols].dropna() if all(col in recent_data.columns for col in weather_cols) else pd.DataFrame()
+            energy_data = recent_data[energy_cols].dropna() if all(col in recent_data.columns for col in energy_cols) else pd.DataFrame()
+            
+            self.logger.info(f"Retrieved cached data - Weather: {len(weather_data)} records, Energy: {len(energy_data)} records")
+            
+            return {'weather': weather_data, 'energy': energy_data}
+            
+        except Exception as e:
+            self.logger.error(f"Error retrieving cached data: {e}")
+            return {'weather': pd.DataFrame(), 'energy': pd.DataFrame()}
+    
+    def fetch_with_fallback(self, start_date: str, end_date: str) -> Dict[str, pd.DataFrame]:
+        """
+        Fetch data with automatic fallback to cached data if APIs fail.
+        
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+            
+        Returns:
+            Dictionary containing weather and energy DataFrames
+        """
+        try:
+            # Primary attempt: fetch from APIs
+            self.logger.info(f"Attempting primary data fetch from APIs for {start_date} to {end_date}")
+            
+            weather_data = self.fetch_all_weather_data(start_date, end_date)
+            energy_data = self.fetch_all_energy_data(start_date, end_date)
+            
+            weather_available = not weather_data.empty
+            energy_available = not energy_data.empty
+            
+            # If both sources have data, return successful fetch
+            if weather_available and energy_available:
+                self.logger.info("Primary data fetch successful for both sources")
+                return {
+                    'weather': weather_data,
+                    'energy': energy_data,
+                    'source': 'api_primary',
+                    'date_range': f"{start_date} to {end_date}"
+                }
+            
+            # Partial failure: try to supplement with cached data
+            if weather_available or energy_available:
+                self.logger.warning("Partial API failure - attempting to supplement with cached data")
+                cached_data = self.get_cached_data(days_back=14)
+                
+                if not weather_available and not cached_data['weather'].empty:
+                    weather_data = cached_data['weather']
+                    self.logger.info("Using cached weather data as fallback")
+                
+                if not energy_available and not cached_data['energy'].empty:
+                    energy_data = cached_data['energy']
+                    self.logger.info("Using cached energy data as fallback")
+                
+                return {
+                    'weather': weather_data,
+                    'energy': energy_data,
+                    'source': 'api_partial_cached_fallback',
+                    'date_range': f"{start_date} to {end_date}"
+                }
+            
+            # Complete API failure: use cached data only
+            self.logger.error("Complete API failure - falling back to cached data")
+            cached_data = self.get_cached_data(days_back=14)
+            
+            return {
+                'weather': cached_data['weather'],
+                'energy': cached_data['energy'],
+                'source': 'cached_fallback_only',
+                'date_range': f"cached_last_14_days"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Critical error in fetch_with_fallback: {e}")
+            # Final fallback: return empty structure
+            return {
+                'weather': pd.DataFrame(),
+                'energy': pd.DataFrame(),
+                'source': 'error_fallback',
+                'date_range': 'error'
+            }
+    
+    def detect_missing_dates(self, expected_days: int = 7) -> List[str]:
+        """
+        Detect missing dates in processed data for automated backfill.
+        
+        Args:
+            expected_days: Number of recent days expected to have data
+            
+        Returns:
+            List of missing dates in YYYY-MM-DD format
+        """
+        try:
+            processed_path = Path(self.config['paths']['processed_data'])
+            
+            if not processed_path.exists():
+                self.logger.warning("No processed data directory found")
+                return []
+            
+            # Get all processed CSV files
+            csv_files = list(processed_path.glob("processed_data_*.csv"))
+            
+            if not csv_files:
+                self.logger.warning("No processed data files found")
+                # Return all expected days as missing
+                end_date = datetime.now() - timedelta(days=4)  # Account for API lag
+                return [(end_date - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(expected_days)]
+            
+            # Collect all dates present in processed files
+            present_dates = set()
+            
+            for csv_file in csv_files:
+                try:
+                    df = pd.read_csv(csv_file)
+                    if 'date' in df.columns:
+                        dates = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d').unique()
+                        present_dates.update(dates)
+                except Exception as e:
+                    self.logger.warning(f"Error reading {csv_file}: {e}")
+                    continue
+            
+            # Generate expected date range (accounting for API lag)
+            end_date = datetime.now() - timedelta(days=4)
+            expected_dates = {
+                (end_date - timedelta(days=i)).strftime('%Y-%m-%d') 
+                for i in range(expected_days)
+            }
+            
+            # Find missing dates
+            missing_dates = sorted(expected_dates - present_dates)
+            
+            if missing_dates:
+                self.logger.info(f"Detected {len(missing_dates)} missing dates: {missing_dates}")
+            else:
+                self.logger.info("No missing dates detected")
+            
+            return missing_dates
+            
+        except Exception as e:
+            self.logger.error(f"Error detecting missing dates: {e}")
+            return []
+    
+    def backfill_missing_data(self, missing_dates: List[str] = None) -> Dict[str, any]:
+        """
+        Automatically backfill missing data for specified dates.
+        
+        Args:
+            missing_dates: List of dates to backfill. If None, auto-detect missing dates.
+            
+        Returns:
+            Dictionary with backfill results
+        """
+        try:
+            if missing_dates is None:
+                missing_dates = self.detect_missing_dates(expected_days=14)
+            
+            if not missing_dates:
+                return {
+                    'status': 'success',
+                    'message': 'No missing dates to backfill',
+                    'dates_processed': [],
+                    'total_records': 0
+                }
+            
+            self.logger.info(f"Starting backfill for {len(missing_dates)} missing dates")
+            
+            successful_dates = []
+            total_records = 0
+            
+            for date_str in missing_dates:
+                try:
+                    self.logger.info(f"Backfilling data for {date_str}")
+                    
+                    # Fetch data for single date with small range
+                    start_date = date_str
+                    end_date = date_str
+                    
+                    result = self.fetch_with_fallback(start_date, end_date)
+                    
+                    if not result['weather'].empty or not result['energy'].empty:
+                        successful_dates.append(date_str)
+                        total_records += len(result['weather']) + len(result['energy'])
+                        self.logger.info(f"Successfully backfilled data for {date_str} from {result['source']}")
+                    else:
+                        self.logger.warning(f"No data available for backfill on {date_str}")
+                        
+                except Exception as e:
+                    self.logger.error(f"Failed to backfill data for {date_str}: {e}")
+                    continue
+            
+            return {
+                'status': 'success' if successful_dates else 'partial',
+                'message': f"Backfilled {len(successful_dates)} of {len(missing_dates)} missing dates",
+                'dates_processed': successful_dates,
+                'dates_failed': [d for d in missing_dates if d not in successful_dates],
+                'total_records': total_records
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error in backfill process: {e}")
+            return {
+                'status': 'error',
+                'message': str(e),
+                'dates_processed': [],
+                'total_records': 0
+            }

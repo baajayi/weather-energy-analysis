@@ -1,7 +1,7 @@
 {
   "quality_metrics": {
-    "timestamp": "2025-07-04T19:32:32.334713",
-    "total_records": 445,
+    "timestamp": "2025-08-13T15:43:40.659042",
+    "total_records": 440,
     "missing_values": {
       "by_column": {
         "date": 0,
@@ -21,35 +21,35 @@
         "energy_change_mwh": 5,
         "energy_change_pct": 5
       },
-      "total_missing": "15",
-      "percentage_missing": 3.3707865168539324
+      "total_missing": 15,
+      "percentage_missing": 3.4090909090909087
     },
     "outliers": {
       "temperature": {
-        "count": "0",
+        "count": 0,
         "percentage": 0.0,
         "extreme_values": []
       },
       "energy": {
-        "count": "0",
+        "count": 0,
         "percentage": 0.0,
-        "negative_values": "0",
-        "extreme_high_values": "0"
+        "negative_values": 0,
+        "extreme_high_values": 0
       }
     },
     "data_freshness": {
-      "latest_date": "2025-07-02T00:00:00",
-      "oldest_date": "2025-04-05T00:00:00",
-      "hours_since_latest": 67.54,
+      "latest_date": "2025-08-10T00:00:00",
+      "oldest_date": "2025-05-15T00:00:00",
+      "hours_since_latest": 87.73,
       "is_stale": true,
       "freshness_threshold_hours": 24,
-      "date_range_days": 88
+      "date_range_days": 87
     },
     "summary_stats": {
       "lat": {
-        "count": 445.0,
-        "mean": 38.681180000000005,
-        "std": 6.34694710727879,
+        "count": 440.0,
+        "mean": 38.68118,
+        "std": 6.347028330007875,
         "min": 29.7604,
         "25%": 33.4484,
         "50%": 40.7128,
@@ -57,9 +57,9 @@
         "max": 47.6062
       },
       "lon": {
-        "count": 445.0,
-        "mean": -98.28234,
-        "std": 17.223438295093196,
+        "count": 440.0,
+        "mean": -98.28234000000002,
+        "std": 17.223658705731403,
         "min": -122.3321,
         "25%": -112.074,
         "50%": -95.3698,
@@ -67,235 +67,248 @@
         "max": -74.006
       },
       "temp_max_f": {
-        "count": 445.0,
-        "mean": 46.326966292134834,
-        "std": 2.8314340764074664,
-        "min": 39.2,
-        "25%": 44.1,
-        "50%": 46.6,
-        "75%": 48.6,
-        "max": 53.1
+        "count": 440.0,
+        "mean": 47.708409090909086,
+        "std": 2.52007831817936,
+        "min": 41.2,
+        "25%": 45.9,
+        "50%": 47.8,
+        "75%": 49.3,
+        "max": 53.2
       },
       "temp_min_f": {
-        "count": 445.0,
-        "mean": 42.84696629213482,
-        "std": 2.4208871524127424,
-        "min": 36.5,
-        "25%": 40.8,
-        "50%": 42.6,
-        "75%": 44.8,
-        "max": 48.7
+        "count": 440.0,
+        "mean": 44.331136363636354,
+        "std": 2.1923367422422544,
+        "min": 39.6,
+        "25%": 42.4,
+        "50%": 44.8,
+        "75%": 46.0,
+        "max": 49.1
       },
       "temp_avg_f": {
-        "count": 445.0,
-        "mean": 44.586966292134825,
-        "std": 2.5679479681020094,
-        "min": 38.3,
-        "25%": 42.45,
-        "50%": 44.5,
-        "75%": 46.7,
-        "max": 50.55
+        "count": 440.0,
+        "mean": 46.01977272727273,
+        "std": 2.308604276781014,
+        "min": 40.8,
+        "25%": 44.1375,
+        "50%": 46.2,
+        "75%": 47.65,
+        "max": 51.05
       },
       "energy_consumption_mwh": {
-        "count": 445.0,
-        "mean": 808401.7191011236,
-        "std": 848313.8627257883,
-        "min": 20574.0,
-        "25%": 86606.0,
-        "50%": 366165.0,
-        "75%": 1503443.0,
+        "count": 440.0,
+        "mean": 921679.4704545455,
+        "std": 962303.2530935445,
+        "min": 20730.0,
+        "25%": 111124.75,
+        "50%": 452247.0,
+        "75%": 1576259.0,
         "max": 3262296.0
       },
       "temp_change_f": {
-        "count": 440.0,
-        "mean": 0.04624999999999996,
-        "std": 0.871494033712949,
-        "min": -2.9000000000000057,
-        "25%": -0.40000000000000036,
-        "50%": 0.09999999999999787,
-        "75%": 0.5500000000000043,
-        "max": 3.0
+        "count": 435.0,
+        "mean": 0.028735632183908046,
+        "std": 0.7229146149772451,
+        "min": -2.750000000000007,
+        "25%": -0.3499999999999943,
+        "50%": 0.09999999999999432,
+        "75%": 0.45000000000000284,
+        "max": 2.0999999999999943
       },
       "energy_change_mwh": {
-        "count": 440.0,
-        "mean": 3177.1704545454545,
-        "std": 65437.82573274568,
-        "min": -369767.0,
-        "25%": -8760.5,
-        "50%": 295.5,
-        "75%": 14768.25,
+        "count": 435.0,
+        "mean": 1268.2597701149425,
+        "std": 76006.23281814827,
+        "min": -453907.0,
+        "25%": -11790.0,
+        "50%": 459.0,
+        "75%": 17940.0,
         "max": 409759.0
       },
       "energy_change_pct": {
-        "count": 440.0,
-        "mean": 0.5536484628194964,
-        "std": 5.8989715564650425,
-        "min": -22.721062902274124,
-        "25%": -3.1106694501789685,
-        "50%": 0.5581218062639115,
-        "75%": 4.22677218490718,
-        "max": 20.73028812812543
+        "count": 435.0,
+        "mean": 0.42307872584967027,
+        "std": 6.4379146487041,
+        "min": -23.031145897344672,
+        "25%": -3.1907756499707505,
+        "50%": 0.5355042931604048,
+        "75%": 4.351902086225268,
+        "max": 30.539541137910753
       }
     }
   },
   "correlations": {
     "overall": {
-      "correlation_coefficient": 0.0117,
-      "r_squared": 0.0001,
-      "slope": 3863.3854,
-      "intercept": 636145.0864,
-      "sample_size": 445
+      "correlation_coefficient": 0.0268,
+      "r_squared": 0.0007,
+      "slope": 11153.5331,
+      "intercept": 408396.412,
+      "sample_size": 440
     },
     "by_city": {
       "Chicago": {
-        "correlation_coefficient": 0.7392,
-        "r_squared": 0.5464,
-        "slope": 111860.1069,
-        "intercept": -2660854.4801,
-        "sample_size": 89
+        "correlation_coefficient": 0.7929,
+        "r_squared": 0.6286,
+        "slope": 169917.4659,
+        "intercept": -5166927.2265,
+        "sample_size": 88
       },
       "Houston": {
-        "correlation_coefficient": 0.868,
-        "r_squared": 0.7534,
-        "slope": 107872.0637,
-        "intercept": -3648444.4192,
-        "sample_size": 89
+        "correlation_coefficient": 0.7535,
+        "r_squared": 0.5678,
+        "slope": 133607.6042,
+        "intercept": -4816766.6196,
+        "sample_size": 88
       },
       "New York": {
-        "correlation_coefficient": 0.6565,
-        "r_squared": 0.431,
-        "slope": 22413.7956,
-        "intercept": -588321.0448,
-        "sample_size": 89
+        "correlation_coefficient": 0.8971,
+        "r_squared": 0.8048,
+        "slope": 47027.7785,
+        "intercept": -1669650.48,
+        "sample_size": 88
       },
       "Phoenix": {
-        "correlation_coefficient": 0.9304,
-        "r_squared": 0.8657,
-        "slope": 11568.0612,
-        "intercept": -444355.469,
-        "sample_size": 89
+        "correlation_coefficient": 0.9139,
+        "r_squared": 0.8353,
+        "slope": 15144.3179,
+        "intercept": -613083.8884,
+        "sample_size": 88
       },
       "Seattle": {
-        "correlation_coefficient": -0.0461,
-        "r_squared": 0.0021,
-        "slope": -58.4481,
-        "intercept": 25576.6446,
-        "sample_size": 89
+        "correlation_coefficient": 0.6437,
+        "r_squared": 0.4144,
+        "slope": 883.1326,
+        "intercept": -15354.7336,
+        "sample_size": 88
       }
     }
   },
   "usage_patterns": {
     "by_temperature_range": {
       "mean": {
-        "50-60\u00b0F": 148507.75,
-        "<50\u00b0F": 814387.15
+        "50-60\u00b0F": 154515.56,
+        "<50\u00b0F": 950629.05
       },
       "median": {
-        "50-60\u00b0F": 148708.0,
-        "<50\u00b0F": 370178.0
+        "50-60\u00b0F": 154720.5,
+        "<50\u00b0F": 472982.0
       },
       "std": {
-        "50-60\u00b0F": 7139.85,
-        "<50\u00b0F": 849813.85
+        "50-60\u00b0F": 7237.61,
+        "<50\u00b0F": 968478.76
       },
       "count": {
-        "50-60\u00b0F": 4,
-        "<50\u00b0F": 441
+        "50-60\u00b0F": 16,
+        "<50\u00b0F": 424
       }
     },
     "by_day_of_week": {
       "mean": {
-        "Friday": 816221.6,
-        "Monday": 815296.8,
-        "Saturday": 775474.86,
-        "Sunday": 764642.71,
-        "Thursday": 828020.27,
-        "Tuesday": 828914.63,
-        "Wednesday": 832351.82
+        "Friday": 916301.62,
+        "Monday": 932966.15,
+        "Saturday": 884031.69,
+        "Sunday": 883531.52,
+        "Thursday": 942164.85,
+        "Tuesday": 946857.92,
+        "Wednesday": 950959.9
       },
       "median": {
-        "Friday": 376986.0,
-        "Monday": 360073.0,
-        "Saturday": 357259.0,
-        "Sunday": 346007.0,
-        "Thursday": 377403.0,
-        "Tuesday": 363595.0,
-        "Wednesday": 378493.0
+        "Friday": 423031.0,
+        "Monday": 480897.0,
+        "Saturday": 436153.0,
+        "Sunday": 462985.0,
+        "Thursday": 485906.0,
+        "Tuesday": 464969.5,
+        "Wednesday": 471137.0
       },
       "std": {
-        "Friday": 853264.1,
-        "Monday": 867252.06,
-        "Saturday": 808953.45,
-        "Sunday": 805326.14,
-        "Thursday": 875681.0,
-        "Tuesday": 879860.17,
-        "Wednesday": 883532.58
+        "Friday": 956571.35,
+        "Monday": 987211.21,
+        "Saturday": 920408.76,
+        "Sunday": 924257.62,
+        "Thursday": 990728.95,
+        "Tuesday": 999424.23,
+        "Wednesday": 1004312.02
       },
       "count": {
-        "Friday": 60,
-        "Monday": 65,
+        "Friday": 65,
+        "Monday": 60,
         "Saturday": 65,
         "Sunday": 65,
-        "Thursday": 60,
-        "Tuesday": 65,
-        "Wednesday": 65
+        "Thursday": 65,
+        "Tuesday": 60,
+        "Wednesday": 60
       }
     },
     "weekend_vs_weekday": {
       "mean": {
-        "false": 824225.79,
-        "true": 770058.78
+        "false": 937572.12,
+        "true": 883781.61
       },
       "median": {
-        "false": 374864.0,
-        "true": 349898.5
+        "false": 459429.0,
+        "true": 440416.5
       },
       "std": {
-        "false": 866678.95,
-        "true": 804025.67
+        "false": 981002.71,
+        "true": 918753.33
       },
       "count": {
-        "false": 315,
+        "false": 310,
         "true": 130
       }
     },
     "heatmap_data": {
       "Friday": {
-        "50-60\u00b0F": NaN,
-        "<50\u00b0F": 816221.6
+        "50-60\u00b0F": 157149.0,
+        "<50\u00b0F": 953034.81
       },
       "Monday": {
-        "50-60\u00b0F": 153236.0,
-        "<50\u00b0F": 825641.5
+        "50-60\u00b0F": 150125.5,
+        "<50\u00b0F": 959960.66
       },
       "Saturday": {
-        "50-60\u00b0F": NaN,
-        "<50\u00b0F": 775474.86
+        "50-60\u00b0F": 154468.0,
+        "<50\u00b0F": 907192.44
       },
       "Sunday": {
         "50-60\u00b0F": 144180.0,
-        "<50\u00b0F": 774337.44
+        "<50\u00b0F": 895083.89
       },
       "Thursday": {
-        "50-60\u00b0F": 140832.0,
-        "<50\u00b0F": 839667.53
+        "50-60\u00b0F": 154445.0,
+        "<50\u00b0F": 980280.32
       },
       "Tuesday": {
-        "50-60\u00b0F": 155783.0,
-        "<50\u00b0F": 839432.31
+        "50-60\u00b0F": 154282.0,
+        "<50\u00b0F": 988572.44
       },
       "Wednesday": {
-        "50-60\u00b0F": NaN,
-        "<50\u00b0F": 832351.82
+        "50-60\u00b0F": 160627.0,
+        "<50\u00b0F": 978212.76
       }
     }
   },
   "time_series_summary": {
     "date_range": {
-      "start": "2025-04-05T00:00:00",
-      "end": "2025-07-02T00:00:00",
-      "total_days": 88
+      "start": "2025-05-15T00:00:00",
+      "end": "2025-08-10T00:00:00",
+      "total_days": 87
     },
     "monthly_trends": {
       "temp_avg_f": {
-        
+        "2025-05": 44.49,
+        "2025-06": 45.99,
+        "2025-07": 46.69,
+        "2025-08": 46.61
+      },
+      "energy_consumption_mwh": {
+        "2025-05": 773610.73,
+        "2025-06": 917988.67,
+        "2025-07": 1003519.05,
+        "2025-08": 930766.04
+      }
+    }
+  }
+}
