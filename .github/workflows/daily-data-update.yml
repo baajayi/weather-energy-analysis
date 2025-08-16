@@ -143,19 +143,19 @@ jobs:
           processed_files=$(git diff --staged --name-only | grep -c "^data/processed" || echo 0)
           log_files=$(git diff --staged --name-only | grep -c "^logs" || echo 0)
 
-          git commit -m "🤖 Enhanced daily data update $(date)
-
-📊 Processed files: $processed_files
-📋 Log files: $log_files
-
-Features:
-- ✅ Fallback data mechanisms
-- ✅ Automated missing data backfill
-- ✅ Comprehensive data validation
-- ✅ File retention management
-- ✅ Notification system integration
-
-Generated with enhanced robustness pipeline 🛡️"
+          git commit -m "🤖 Enhanced daily data update $(date)" \
+                     -m "" \
+                     -m "📊 Processed files: $processed_files" \
+                     -m "📋 Log files: $log_files" \
+                     -m "" \
+                     -m "Features:" \
+                     -m "- ✅ Fallback data mechanisms" \
+                     -m "- ✅ Automated missing data backfill" \
+                     -m "- ✅ Comprehensive data validation" \
+                     -m "- ✅ File retention management" \
+                     -m "- ✅ Notification system integration" \
+                     -m "" \
+                     -m "Generated with enhanced robustness pipeline 🛡️"
           git push
           echo "✅ Successfully committed enhanced pipeline results"
         fi
