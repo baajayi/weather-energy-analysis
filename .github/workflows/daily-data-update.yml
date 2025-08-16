@@ -1,5 +1,7 @@
-# GitHub Actions workflow for daily data updates
 name: Daily Weather Energy Data Update
+
+permissions:
+  contents: write
 
 on:
   schedule:
@@ -10,25 +12,25 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-        
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        
+
     - name: Clear Python cache and force fresh environment
       run: |
         find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         find . -name "*.pyc" -delete 2>/dev/null || true
-        
+
     - name: Verify we have the latest code
       run: |
         echo "Current commit: $(git rev-parse HEAD)"
@@ -39,7 +41,7 @@ jobs:
           echo "❌ BAD: Definitive fix NOT found - using old code"
           exit 1
         fi
-        
+
     - name: Configure API keys
       env:
         NOAA_TOKEN: ${{ secrets.NOAA_TOKEN }}
@@ -50,95 +52,97 @@ jobs:
         # Replace the test credentials with production secrets
         sed -i "s/GlgHRWybAdVcAMnEROnbTnmGBSLwvkRQ/$NOAA_TOKEN/" config/config_runtime.yaml
         sed -i "s/kUgx8GnkbIQXsmTzfQT7g4d7TG3X0XqhYBCWBmMr/$EIA_API_KEY/" config/config_runtime.yaml
-        
+
     - name: Run enhanced daily data pipeline
       timeout-minutes: 20
       run: |
         echo "Starting enhanced pipeline with fallback mechanisms..."
         python src/pipeline.py --mode daily --config config/config_runtime.yaml
         echo "Pipeline completed. Checking results..."
-        ls -la data/processed/
-        
+        ls -la data/processed/ || echo "No data/processed directory yet"
+
     - name: Run data validation and integrity checks
       if: always()
       run: |
         echo "Running comprehensive data validation..."
         python src/pipeline.py --mode quality-check --config config/config_runtime.yaml
-        
+
     - name: Check for missing data and backfill
       if: always()
       run: |
         echo "Checking for missing data and attempting backfill..."
         python src/pipeline.py --mode backfill --days 7 --config config/config_runtime.yaml
-        
+
     - name: Clean up old files
       if: success()
       run: |
         echo "Cleaning up old processed files (keep last 30 days)..."
         python src/pipeline.py --mode cleanup --days 30 --config config/config_runtime.yaml
-        
+
     - name: Enhanced data quality verification
       if: always()
       run: |
         echo "Performing enhanced data quality verification..."
-        if [ -f data/processed/processed_data_*.csv ]; then
-          latest_file=$(ls -t data/processed/processed_data_*.csv | head -1)
+
+        if compgen -G "data/processed/processed_data_*.csv" > /dev/null; then
+          latest_file=$(ls -1t data/processed/processed_data_*.csv 2>/dev/null | head -1)
           echo "✅ Latest processed file: $latest_file"
-          record_count=$(tail -n +2 "$latest_file" | wc -l)
+
+          if [ -s "$latest_file" ]; then
+            record_count=$(tail -n +2 "$latest_file" | wc -l || echo 0)
+          else
+            record_count=0
+          fi
           echo "📊 Record count: $record_count"
-          echo "🏙️ Cities in data: $(tail -n +2 "$latest_file" | cut -d',' -f2 | sort | uniq | tr '\n' ', ')"
-          
-          # Check if we have a reasonable amount of data
+
+          cities=$(tail -n +2 "$latest_file" 2>/dev/null | cut -d',' -f2 | sort -u | paste -sd ", " - || true)
+          echo "🏙️ Cities in data: ${cities:-<none>}"
+
           if [ "$record_count" -lt 10 ]; then
             echo "⚠️ Warning: Low record count ($record_count records)"
           else
             echo "✅ Data quality check passed"
           fi
-          
-          # Check for recent quality reports
-          if [ -f logs/daily_quality_report_*.json ]; then
-            latest_report=$(ls -t logs/daily_quality_report_*.json | head -1)
+
+          if compgen -G "logs/daily_quality_report_*.json" > /dev/null; then
+            latest_report=$(ls -1t logs/daily_quality_report_*.json 2>/dev/null | head -1)
             echo "📋 Latest quality report: $latest_report"
           fi
-          
-          # Check for notifications log
+
           if [ -f logs/notifications.jsonl ]; then
             notification_count=$(wc -l < logs/notifications.jsonl)
             echo "🔔 Total notifications logged: $notification_count"
           fi
-          
+
         else
           echo "❌ No processed data files found!"
-          
-          # Check if pipeline ran but failed
+
           if [ -f logs/pipeline.log ]; then
             echo "📋 Checking pipeline logs for errors..."
-            tail -20 logs/pipeline.log
+            tail -20 logs/pipeline.log || true
           fi
-          
-          # Don't exit 1 here anymore - the enhanced pipeline handles failures gracefully
+
           echo "⚠️ Pipeline may have used fallback mechanisms or encountered data unavailability"
         fi
-        
+
     - name: Commit and push data updates
       if: always()
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        
+
         # Add all generated files (data, logs, reports)
-        git add data/processed/*.csv || echo "No new processed data files to add"
-        git add logs/*.json || echo "No new log files to add"
-        git add logs/notifications.jsonl || echo "No notification log to add"
-        
+        git add data/processed/*.csv 2>/dev/null || echo "No new processed data files to add"
+        git add logs/*.json 2>/dev/null || echo "No new log files to add"
+        git add logs/notifications.jsonl 2>/dev/null || echo "No notification log to add"
+
         # Create commit with enhanced information
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
-          # Count files being committed
-          processed_files=$(git diff --staged --name-only | grep "data/processed" | wc -l)
-          log_files=$(git diff --staged --name-only | grep "logs" | wc -l)
-          
+          processed_files=$(git diff --staged --name-only | grep -c "^data/processed" || echo 0)
+          log_files=$(git diff --staged --name-only | grep -c "^logs" || echo 0)
+
           git commit -m "$(cat <<EOF
 🤖 Enhanced daily data update $(date)
 
@@ -147,7 +151,7 @@ jobs:
 
 Features:
 - ✅ Fallback data mechanisms
-- ✅ Automated missing data backfill  
+- ✅ Automated missing data backfill
 - ✅ Comprehensive data validation
 - ✅ File retention management
 - ✅ Notification system integration
