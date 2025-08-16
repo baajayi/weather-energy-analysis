@@ -139,7 +139,8 @@ jobs:
           processed_files=$(git diff --staged --name-only | grep "data/processed" | wc -l)
           log_files=$(git diff --staged --name-only | grep "logs" | wc -l)
           
-          commit_msg="🤖 Enhanced daily data update $(date)
+          git commit -m "$(cat <<EOF
+🤖 Enhanced daily data update $(date)
 
 📊 Processed files: $processed_files
 📋 Log files: $log_files
@@ -151,9 +152,9 @@ Features:
 - ✅ File retention management
 - ✅ Notification system integration
 
-Generated with enhanced robustness pipeline 🛡️"
-          
-          git commit -m "$commit_msg"
+Generated with enhanced robustness pipeline 🛡️
+EOF
+)"
           git push
           echo "✅ Successfully committed enhanced pipeline results"
         fi
