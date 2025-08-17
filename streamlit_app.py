@@ -22,113 +22,96 @@ st.set_page_config(
     layout="wide"
 )
 
-@st.cache_data
-def load_production_data():
-    """Load real processed data from the pipeline."""
-    try:
-        # Try to load the latest processed data file
-        processed_data_path = Path("data/processed")
+@st.cache_data(ttl=3600)  # Cache for 1 hour to allow fresh data generation
+def load_fresh_production_data():
+    """Load real processed data from the pipeline, generating fresh data if needed."""
+    processed_data_path = Path("data/processed")
+    
+    # Check for existing data
+    csv_files = []
+    if processed_data_path.exists():
+        csv_files = list(processed_data_path.glob("processed_data_*.csv"))
+    
+    # Determine if we need fresh data
+    needs_fresh_data = True
+    latest_file = None
+    
+    if csv_files:
+        latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
+        df = pd.read_csv(latest_file)
+        df['date'] = pd.to_datetime(df['date'])
         
-        if processed_data_path.exists():
-            # Find the most recent processed data file
-            csv_files = list(processed_data_path.glob("processed_data_*.csv"))
-            
-            if csv_files:
-                latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
-                df = pd.read_csv(latest_file)
-                df['date'] = pd.to_datetime(df['date'])
-                
-                # Check if data is recent enough (within last 30 days)
-                latest_date = df['date'].max()
-                days_old = (datetime.now() - latest_date).days
-                
-                if days_old > 30:
-                    st.warning(f"⚠️ Production data is {days_old} days old. Using demo data with recent dates.")
-                    return load_demo_data(), "demo"
-                
-                # Ensure we have a reasonable amount of data
-                if len(df) < 5:
-                    st.warning("⚠️ Limited production data available. Supplementing with demo data.")
-                    demo_df, _ = load_demo_data()
-                    # Use production data dates but fill with more demo data if needed
-                    combined_df = pd.concat([df, demo_df.tail(20)], ignore_index=True)
-                    combined_df = combined_df.drop_duplicates(subset=['city', 'date'], keep='first')
-                    return combined_df.sort_values(['date', 'city']), "mixed"
-                
-                return df, "production"
+        # Check data freshness and quantity
+        latest_date = df['date'].max()
+        days_old = (datetime.now() - latest_date).days
+        has_sufficient_data = len(df) >= 20  # Need at least 20 records
         
-        # If no processed data, fall back to demo data
-        st.info("📊 No production data found. Using demo data with current dates.")
-        return load_demo_data(), "demo"
-        
-    except Exception as e:
-        st.error(f"Error loading production data: {e}")
-        return load_demo_data(), "demo"
+        if days_old <= 7 and has_sufficient_data:
+            needs_fresh_data = False
+            st.success(f"✅ Using fresh production data ({len(df)} records, {days_old} days old)")
+            return df, "production"
+        else:
+            st.warning(f"🔄 Data needs refresh: {days_old} days old, {len(df)} records")
+    
+    # Generate fresh data if needed
+    if needs_fresh_data:
+        with st.spinner("🔄 Generating fresh data from APIs..."):
+            try:
+                # Import here to avoid circular imports
+                import subprocess
+                import sys
+                
+                # Run pipeline to generate fresh historical data
+                st.info("📊 Running pipeline to fetch fresh data (this may take 1-2 minutes)...")
+                
+                # Run 30-day historical backfill to ensure good data coverage
+                result = subprocess.run([
+                    sys.executable, "src/pipeline.py", 
+                    "--mode", "historical", 
+                    "--days", "30",
+                    "--config", "config/config.yaml"
+                ], capture_output=True, text=True, cwd=".")
+                
+                if result.returncode == 0:
+                    st.success("✅ Fresh data generated successfully!")
+                    
+                    # Load the newly generated data
+                    csv_files = list(processed_data_path.glob("processed_data_*.csv"))
+                    if csv_files:
+                        latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
+                        df = pd.read_csv(latest_file)
+                        df['date'] = pd.to_datetime(df['date'])
+                        
+                        st.success(f"🎉 Loaded {len(df)} fresh records spanning {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}")
+                        return df, "fresh_production"
+                    else:
+                        raise Exception("No data files generated")
+                        
+                else:
+                    error_msg = result.stderr if result.stderr else result.stdout
+                    raise Exception(f"Pipeline failed: {error_msg}")
+                    
+            except Exception as e:
+                st.error(f"❌ Failed to generate fresh data: {e}")
+                st.error("Please check API keys and configuration.")
+                
+                # If we have any existing data, use it as fallback
+                if latest_file and latest_file.exists():
+                    st.warning("🔄 Using existing data as fallback...")
+                    df = pd.read_csv(latest_file)
+                    df['date'] = pd.to_datetime(df['date'])
+                    return df, "fallback"
+                
+                # Final fallback - stop the app
+                st.error("❌ No data available. Please:")
+                st.error("1. Check API keys in config/config.yaml")
+                st.error("2. Run: `python src/pipeline.py --mode historical --days 30`")
+                st.error("3. Refresh this page")
+                st.stop()
+    
+    # This should never be reached
+    st.stop()
 
-@st.cache_data
-def load_demo_data():
-    """Load sample data for demonstration when production data unavailable."""
-    np.random.seed(42)
-    
-    cities = [
-        {"name": "New York", "state": "New York", "lat": 40.7128, "lon": -74.0060},
-        {"name": "Chicago", "state": "Illinois", "lat": 41.8781, "lon": -87.6298},
-        {"name": "Houston", "state": "Texas", "lat": 29.7604, "lon": -95.3698},
-        {"name": "Phoenix", "state": "Arizona", "lat": 33.4484, "lon": -112.0740},
-        {"name": "Seattle", "state": "Washington", "lat": 47.6062, "lon": -122.3321}
-    ]
-    
-    # Generate 30 days of sample data starting from recent date
-    end_date = datetime.now().date()
-    start_date = end_date - timedelta(days=29)
-    dates = pd.date_range(start=start_date, end=end_date, freq='D')
-    data = []
-    
-    for city in cities:
-        base_temp = {"New York": 70, "Chicago": 65, "Houston": 85, "Phoenix": 95, "Seattle": 60}[city["name"]]
-        base_energy = {"New York": 25000, "Chicago": 22000, "Houston": 28000, "Phoenix": 24000, "Seattle": 18000}[city["name"]]
-        
-        for i, date in enumerate(dates):
-            # Simulate seasonal temperature variation
-            temp_variation = 10 * np.sin(i * 0.2) + np.random.normal(0, 5)
-            temp_avg = base_temp + temp_variation
-            
-            # Energy consumption inversely correlated with moderate temperatures
-            temp_deviation = abs(temp_avg - 72)  # 72°F is comfortable temperature
-            energy_base = base_energy + (temp_deviation * 50) + np.random.normal(0, 1000)
-            
-            # Weekend effect (lower energy consumption)
-            if date.weekday() >= 5:
-                energy_base *= 0.85
-            
-            # Temperature categorization
-            if temp_avg < 50:
-                temp_range = '<50°F'
-            elif temp_avg < 60:
-                temp_range = '50-60°F'
-            elif temp_avg < 70:
-                temp_range = '60-70°F'
-            elif temp_avg < 80:
-                temp_range = '70-80°F'
-            elif temp_avg < 90:
-                temp_range = '80-90°F'
-            else:
-                temp_range = '>90°F'
-            
-            data.append({
-                'date': date,
-                'city': city["name"],
-                'state': city["state"],
-                'lat': city["lat"],
-                'lon': city["lon"],
-                'temp_avg_f': round(temp_avg, 1),
-                'energy_consumption_mwh': round(energy_base, 0),
-                'day_of_week': date.strftime('%A'),
-                'is_weekend': date.weekday() >= 5,
-                'temp_range': temp_range
-            })
-    
-    return pd.DataFrame(data)
 
 def create_geographic_overview(data: pd.DataFrame):
     """Create Visualization 1 - Geographic Overview."""
@@ -379,21 +362,29 @@ def main():
     st.title("⚡ US Weather & Energy Analysis Dashboard")
     st.markdown("---")
     
-    # Load data
-    data, data_mode = load_production_data()
+    # Load fresh production data (no demo fallback)
+    data, data_mode = load_fresh_production_data()
     
     # Sidebar
     st.sidebar.header("Dashboard Controls")
     
+    # Manual refresh button
+    if st.sidebar.button("🔄 Force Refresh Data", help="Generate fresh data from APIs"):
+        st.cache_data.clear()  # Clear all cached data
+        st.rerun()  # Rerun the app to fetch fresh data
+    
     if data_mode == "production":
-        st.sidebar.markdown("**🚀 Production Mode**: Using real pipeline data")
+        st.sidebar.markdown("**🟢 Production Mode**: Using existing fresh data")
         st.sidebar.success("Live data from NOAA & EIA APIs")
-    elif data_mode == "mixed":
-        st.sidebar.markdown("**🟡 Mixed Mode**: Production + Demo data")
-        st.sidebar.warning("Limited production data supplemented with demo data")
+    elif data_mode == "fresh_production":
+        st.sidebar.markdown("**🆕 Fresh Production Mode**: Just generated new data")
+        st.sidebar.success("Freshly fetched from NOAA & EIA APIs")
+    elif data_mode == "fallback":
+        st.sidebar.markdown("**🔄 Fallback Mode**: Using existing data")
+        st.sidebar.warning("API generation failed, using last available data")
     else:
-        st.sidebar.markdown("**🎭 Demo Mode**: Using simulated data for demonstration")
-        st.sidebar.info("Deploy with processed data for production mode")
+        st.sidebar.markdown("**🔧 Unknown Mode**: Data loaded successfully")
+        st.sidebar.info("Data source determination unclear")
     
     # Date range selector
     min_date = data['date'].min().date()

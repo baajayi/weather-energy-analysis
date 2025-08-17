@@ -1,6 +1,6 @@
 {
   "quality_metrics": {
-    "timestamp": "2025-08-16T19:05:05.381702",
+    "timestamp": "2025-08-16T19:26:56.685700",
     "total_records": 443,
     "missing_values": {
       "by_column": {
@@ -40,7 +40,7 @@
     "data_freshness": {
       "latest_date": "2025-08-14T00:00:00",
       "oldest_date": "2025-05-18T00:00:00",
-      "hours_since_latest": 67.08,
+      "hours_since_latest": 67.45,
       "is_stale": true,
       "freshness_threshold_hours": 24,
       "date_range_days": 88
