@@ -182,6 +182,14 @@ class DataFetcher:
             
             self.logger.info(f"Fetching energy data for {city['name']} from {start_date} to {end_date}")
             
+            # Debug API key (show only first/last 4 characters for security)
+            api_key = self.eia_config['api_key']
+            if api_key:
+                key_preview = f"{api_key[:4]}...{api_key[-4:]}" if len(api_key) > 8 else "short_key"
+                self.logger.debug(f"Using EIA API key: {key_preview}")
+            else:
+                self.logger.warning("EIA API key is empty or missing!")
+            
             response = self._make_request_with_retry(
                 url, params, {},
                 max_retries=self.eia_config['retry_attempts'],

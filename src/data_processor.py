@@ -5,7 +5,7 @@ Data processing module for cleaning and transforming weather and energy data.
 import pandas as pd
 import numpy as np
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional
 import yaml
 from pathlib import Path
