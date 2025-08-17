@@ -37,9 +37,28 @@ def load_production_data():
                 latest_file = max(csv_files, key=lambda x: x.stat().st_mtime)
                 df = pd.read_csv(latest_file)
                 df['date'] = pd.to_datetime(df['date'])
+                
+                # Check if data is recent enough (within last 30 days)
+                latest_date = df['date'].max()
+                days_old = (datetime.now() - latest_date).days
+                
+                if days_old > 30:
+                    st.warning(f"⚠️ Production data is {days_old} days old. Using demo data with recent dates.")
+                    return load_demo_data(), "demo"
+                
+                # Ensure we have a reasonable amount of data
+                if len(df) < 5:
+                    st.warning("⚠️ Limited production data available. Supplementing with demo data.")
+                    demo_df, _ = load_demo_data()
+                    # Use production data dates but fill with more demo data if needed
+                    combined_df = pd.concat([df, demo_df.tail(20)], ignore_index=True)
+                    combined_df = combined_df.drop_duplicates(subset=['city', 'date'], keep='first')
+                    return combined_df.sort_values(['date', 'city']), "mixed"
+                
                 return df, "production"
         
         # If no processed data, fall back to demo data
+        st.info("📊 No production data found. Using demo data with current dates.")
         return load_demo_data(), "demo"
         
     except Exception as e:
@@ -59,8 +78,10 @@ def load_demo_data():
         {"name": "Seattle", "state": "Washington", "lat": 47.6062, "lon": -122.3321}
     ]
     
-    # Generate 30 days of sample data
-    dates = pd.date_range(start='2024-06-01', periods=30, freq='D')
+    # Generate 30 days of sample data starting from recent date
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=29)
+    dates = pd.date_range(start=start_date, end=end_date, freq='D')
     data = []
     
     for city in cities:
@@ -367,6 +388,9 @@ def main():
     if data_mode == "production":
         st.sidebar.markdown("**🚀 Production Mode**: Using real pipeline data")
         st.sidebar.success("Live data from NOAA & EIA APIs")
+    elif data_mode == "mixed":
+        st.sidebar.markdown("**🟡 Mixed Mode**: Production + Demo data")
+        st.sidebar.warning("Limited production data supplemented with demo data")
     else:
         st.sidebar.markdown("**🎭 Demo Mode**: Using simulated data for demonstration")
         st.sidebar.info("Deploy with processed data for production mode")
