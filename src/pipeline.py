@@ -403,7 +403,7 @@ def main():
         
         # Print result
         print(f"\nPipeline execution completed:")
-        print(f"Status: {result['status']}")
+        print(f"Status: {result.get('status', 'ok')}")
         
         if result['status'] == 'success':
             if 'quality_score' in result:

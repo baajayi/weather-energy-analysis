@@ -874,6 +874,7 @@ class DataProcessor:
             Dictionary with cleanup results
         """
         cleanup_results = {
+            'status': 'success',
             'files_removed': [],
             'files_retained': [],
             'space_freed_mb': 0.0,
@@ -926,4 +927,6 @@ class DataProcessor:
             
         except Exception as e:
             self.logger.error(f"Error during file cleanup: {e}")
+            cleanup_results['status'] = 'error'
+            cleanup_results['message'] = str(e)
             return cleanup_results
