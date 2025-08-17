@@ -49,9 +49,25 @@ jobs:
       run: |
         # Create runtime config with secrets (use config_test.yaml as template)
         cp config/config_test.yaml config/config_runtime.yaml
-        # Replace the test credentials with production secrets
-        sed -i "s/GlgHRWybAdVcAMnEROnbTnmGBSLwvkRQ/$NOAA_TOKEN/" config/config_runtime.yaml
-        sed -i "s/kUgx8GnkbIQXsmTzfQT7g4d7TG3X0XqhYBCWBmMr/$EIA_API_KEY/" config/config_runtime.yaml
+        
+        # Check if secrets are available
+        if [ -z "$NOAA_TOKEN" ]; then
+          echo "⚠️ Warning: NOAA_TOKEN secret is not set, using test token"
+        else
+          echo "✅ NOAA_TOKEN is available"
+          sed -i "s/GlgHRWybAdVcAMnEROnbTnmGBSLwvkRQ/$NOAA_TOKEN/" config/config_runtime.yaml
+        fi
+        
+        if [ -z "$EIA_API_KEY" ]; then
+          echo "⚠️ Warning: EIA_API_KEY secret is not set, using test key"
+        else
+          echo "✅ EIA_API_KEY is available" 
+          sed -i "s/kUgx8GnkbIQXsmTzfQT7g4d7TG3X0XqhYBCWBmMr/$EIA_API_KEY/" config/config_runtime.yaml
+        fi
+        
+        # Verify the configuration was updated
+        echo "📋 Configuration check:"
+        grep -E "(token|api_key):" config/config_runtime.yaml | sed 's/\(.\{20\}\).*/\1.../' || echo "No API keys found in config"
 
     - name: Run enhanced daily data pipeline
       timeout-minutes: 20
