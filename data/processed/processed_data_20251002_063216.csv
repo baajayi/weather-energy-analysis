@@ -1,0 +1,16 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range
+2025-09-26,Chicago,Illinois,41.8781,-87.6298,46.9,42.6,44.75,Friday,False,<50°F
+2025-09-26,Houston,Texas,29.7604,-95.3698,48.2,44.2,46.2,Friday,False,<50°F
+2025-09-26,New York,New York,40.7128,-74.006,46.8,44.2,45.5,Friday,False,<50°F
+2025-09-26,Phoenix,Arizona,33.4484,-112.074,48.0,44.1,46.05,Friday,False,<50°F
+2025-09-26,Seattle,Washington,47.6062,-122.3321,44.6,41.0,42.8,Friday,False,<50°F
+2025-09-27,Chicago,Illinois,41.8781,-87.6298,47.7,43.3,45.5,Saturday,True,<50°F
+2025-09-27,Houston,Texas,29.7604,-95.3698,48.0,43.5,45.75,Saturday,True,<50°F
+2025-09-27,New York,New York,40.7128,-74.006,46.2,43.9,45.05,Saturday,True,<50°F
+2025-09-27,Phoenix,Arizona,33.4484,-112.074,47.7,44.4,46.05,Saturday,True,<50°F
+2025-09-27,Seattle,Washington,47.6062,-122.3321,45.5,41.9,43.7,Saturday,True,<50°F
+2025-09-28,Chicago,Illinois,41.8781,-87.6298,46.4,43.2,44.8,Sunday,True,<50°F
+2025-09-28,Houston,Texas,29.7604,-95.3698,48.2,43.3,45.75,Sunday,True,<50°F
+2025-09-28,New York,New York,40.7128,-74.006,46.9,43.5,45.2,Sunday,True,<50°F
+2025-09-28,Phoenix,Arizona,33.4484,-112.074,48.0,45.0,46.5,Sunday,True,<50°F
+2025-09-28,Seattle,Washington,47.6062,-122.3321,44.4,41.4,42.9,Sunday,True,<50°F

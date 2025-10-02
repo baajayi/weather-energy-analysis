@@ -1,0 +1,88 @@
+{
+  "timestamp": "2025-10-02T06:32:16.103019",
+  "total_records": 15,
+  "missing_values": {
+    "by_column": {
+      "date": 0,
+      "city": 0,
+      "state": 0,
+      "lat": 0,
+      "lon": 0,
+      "temp_max_f": 0,
+      "temp_min_f": 0,
+      "temp_avg_f": 0,
+      "day_of_week": 0,
+      "is_weekend": 0,
+      "temp_range": 0
+    },
+    "total_missing": 0,
+    "percentage_missing": 0.0
+  },
+  "outliers": {
+    "temperature": {
+      "count": 0,
+      "percentage": 0.0,
+      "extreme_values": []
+    }
+  },
+  "data_freshness": {
+    "latest_date": "2025-09-28T00:00:00",
+    "oldest_date": "2025-09-26T00:00:00",
+    "hours_since_latest": 102.54,
+    "is_stale": true,
+    "freshness_threshold_hours": 24,
+    "date_range_days": 2
+  },
+  "summary_stats": {
+    "lat": {
+      "count": 15.0,
+      "mean": 38.68118000000001,
+      "std": 6.56232855527888,
+      "min": 29.7604,
+      "25%": 33.4484,
+      "50%": 40.7128,
+      "75%": 41.8781,
+      "max": 47.6062
+    },
+    "lon": {
+      "count": 15.0,
+      "mean": -98.28234,
+      "std": 17.807909697932384,
+      "min": -122.3321,
+      "25%": -112.074,
+      "50%": -95.3698,
+      "75%": -87.6298,
+      "max": -74.006
+    },
+    "temp_max_f": {
+      "count": 15.0,
+      "mean": 46.9,
+      "std": 1.2688577540449526,
+      "min": 44.4,
+      "25%": 46.3,
+      "50%": 46.9,
+      "75%": 48.0,
+      "max": 48.2
+    },
+    "temp_min_f": {
+      "count": 15.0,
+      "mean": 43.29999999999999,
+      "std": 1.1389217958854148,
+      "min": 41.0,
+      "25%": 42.900000000000006,
+      "50%": 43.5,
+      "75%": 44.150000000000006,
+      "max": 45.0
+    },
+    "temp_avg_f": {
+      "count": 15.0,
+      "mean": 45.10000000000001,
+      "std": 1.1481351339081503,
+      "min": 42.8,
+      "25%": 44.775,
+      "50%": 45.5,
+      "75%": 45.9,
+      "max": 46.5
+    }
+  }
+}
