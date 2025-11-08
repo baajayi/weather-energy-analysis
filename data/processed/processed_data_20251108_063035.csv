@@ -1,0 +1,6 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2025-11-02,Chicago,Illinois,41.8781,-87.6298,41.5,39.4,40.45,Sunday,True,<50°F,PJM,1925459.0,,,
+2025-11-02,Houston,Texas,29.7604,-95.3698,45.3,41.0,43.15,Sunday,True,<50°F,ERCO,1061782.0,,,
+2025-11-02,New York,New York,40.7128,-74.006,42.6,39.7,41.150000000000006,Sunday,True,<50°F,NYIS,342014.0,,,
+2025-11-02,Phoenix,Arizona,33.4484,-112.074,48.4,43.0,45.7,Sunday,True,<50°F,AZPS,96197.0,,,
+2025-11-02,Seattle,Washington,47.6062,-122.3321,41.9,40.1,41.0,Sunday,True,<50°F,SCL,24879.0,,,
