@@ -1,0 +1,91 @@
+{
+  "quality_metrics": {
+    "timestamp": "2025-11-10T06:36:32.899427",
+    "total_records": 15,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "day_of_week": 0,
+        "is_weekend": 0
+      },
+      "total_missing": 0,
+      "percentage_missing": 0.0
+    },
+    "outliers": {
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2025-11-06T00:00:00",
+      "oldest_date": "2025-11-04T00:00:00",
+      "hours_since_latest": 102.61,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 2
+    },
+    "summary_stats": {
+      "energy_consumption_mwh": {
+        "count": 15.0,
+        "mean": 751965.2666666667,
+        "std": 804546.5979939497,
+        "min": 25802.0,
+        "25%": 96921.5,
+        "50%": 380637.0,
+        "75%": 1213059.5,
+        "max": 2079794.0
+      }
+    }
+  },
+  "correlations": {
+    "error": "\"['temp_avg_f'] not in index\""
+  },
+  "usage_patterns": {
+    "by_day_of_week": {
+      "mean": {
+        "Thursday": 761979.0,
+        "Tuesday": 743350.6,
+        "Wednesday": 750566.2
+      },
+      "median": {
+        "Thursday": 380637.0,
+        "Tuesday": 366687.0,
+        "Wednesday": 381706.0
+      },
+      "std": {
+        "Thursday": 873975.98,
+        "Tuesday": 868644.83,
+        "Wednesday": 864253.95
+      },
+      "count": {
+        "Thursday": 5,
+        "Tuesday": 5,
+        "Wednesday": 5
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "false": 751965.27
+      },
+      "median": {
+        "false": 380637.0
+      },
+      "std": {
+        "false": 804546.6
+      },
+      "count": {
+        "false": 15
+      }
+    }
+  },
+  "time_series_summary": {
+    "error": "\"Column(s) ['temp_avg_f'] do not exist\""
+  }
+}
