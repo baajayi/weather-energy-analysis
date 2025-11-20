@@ -1,0 +1,95 @@
+{
+  "quality_metrics": {
+    "timestamp": "2025-11-20T06:33:58.698190",
+    "total_records": 15,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "day_of_week": 0,
+        "is_weekend": 0
+      },
+      "total_missing": 0,
+      "percentage_missing": 0.0
+    },
+    "outliers": {
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2025-11-16T00:00:00",
+      "oldest_date": "2025-11-14T00:00:00",
+      "hours_since_latest": 102.57,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 2
+    },
+    "summary_stats": {
+      "energy_consumption_mwh": {
+        "count": 15.0,
+        "mean": 755177.3333333334,
+        "std": 796692.4503695321,
+        "min": 24354.0,
+        "25%": 99612.0,
+        "50%": 374381.0,
+        "75%": 1248901.5,
+        "max": 2169997.0
+      }
+    }
+  },
+  "correlations": {
+    "error": "\"['temp_avg_f'] not in index\""
+  },
+  "usage_patterns": {
+    "by_day_of_week": {
+      "mean": {
+        "Friday": 790007.4,
+        "Saturday": 740952.2,
+        "Sunday": 734572.4
+      },
+      "median": {
+        "Friday": 394307.0,
+        "Saturday": 374381.0,
+        "Sunday": 368835.0
+      },
+      "std": {
+        "Friday": 912030.8,
+        "Saturday": 836703.37,
+        "Sunday": 829061.66
+      },
+      "count": {
+        "Friday": 5,
+        "Saturday": 5,
+        "Sunday": 5
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "false": 790007.4,
+        "true": 737762.3
+      },
+      "median": {
+        "false": 394307.0,
+        "true": 371608.0
+      },
+      "std": {
+        "false": 912030.8,
+        "true": 785264.63
+      },
+      "count": {
+        "false": 5,
+        "true": 10
+      }
+    }
+  },
+  "time_series_summary": {
+    "error": "\"Column(s) ['temp_avg_f'] do not exist\""
+  }
+}
