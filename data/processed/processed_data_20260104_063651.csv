@@ -1,0 +1,11 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2025-12-29,Chicago,Illinois,41.8781,-87.6298,36.3,34.5,35.4,Monday,False,<50°F,PJM,2417605.0,,,
+2025-12-30,Chicago,Illinois,41.8781,-87.6298,36.5,33.8,35.15,Tuesday,False,<50°F,PJM,2706831.0,-0.25,289226.0,11.963327342555964
+2025-12-29,Houston,Texas,29.7604,-95.3698,43.3,39.7,41.5,Monday,False,<50°F,ERCO,1280830.0,,,
+2025-12-30,Houston,Texas,29.7604,-95.3698,42.1,38.3,40.2,Tuesday,False,<50°F,ERCO,1295807.0,-1.2999999999999972,14977.0,1.16931989413116
+2025-12-29,New York,New York,40.7128,-74.006,40.8,37.6,39.2,Monday,False,<50°F,NYIS,441137.0,,,
+2025-12-30,New York,New York,40.7128,-74.006,37.9,36.9,37.4,Tuesday,False,<50°F,NYIS,469504.0,-1.8000000000000043,28367.0,6.430428642349195
+2025-12-29,Phoenix,Arizona,33.4484,-112.074,45.7,41.2,43.45,Monday,False,<50°F,AZPS,102452.0,,,
+2025-12-30,Phoenix,Arizona,33.4484,-112.074,45.1,42.8,43.95,Tuesday,False,<50°F,AZPS,104196.0,0.5,1744.0,1.702260570803893
+2025-12-29,Seattle,Washington,47.6062,-122.3321,39.9,37.9,38.9,Monday,False,<50°F,SCL,32826.0,,,
+2025-12-30,Seattle,Washington,47.6062,-122.3321,40.8,38.1,39.45,Tuesday,False,<50°F,SCL,31890.0,0.5500000000000043,-936.0,-2.8513982818497485
