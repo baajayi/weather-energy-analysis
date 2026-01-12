@@ -1,0 +1,91 @@
+{
+  "quality_metrics": {
+    "timestamp": "2026-01-12T06:42:51.827117",
+    "total_records": 15,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "day_of_week": 0,
+        "is_weekend": 0
+      },
+      "total_missing": 0,
+      "percentage_missing": 0.0
+    },
+    "outliers": {
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2026-01-08T00:00:00",
+      "oldest_date": "2026-01-06T00:00:00",
+      "hours_since_latest": 102.71,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 2
+    },
+    "summary_stats": {
+      "energy_consumption_mwh": {
+        "count": 15.0,
+        "mean": 816165.6,
+        "std": 891382.5840652423,
+        "min": 31889.0,
+        "25%": 100885.5,
+        "50%": 433147.0,
+        "75%": 1187098.0,
+        "max": 2409000.0
+      }
+    }
+  },
+  "correlations": {
+    "error": "\"['temp_avg_f'] not in index\""
+  },
+  "usage_patterns": {
+    "by_day_of_week": {
+      "mean": {
+        "Thursday": 807842.6,
+        "Tuesday": 833184.6,
+        "Wednesday": 807469.6
+      },
+      "median": {
+        "Thursday": 415969.0,
+        "Tuesday": 447701.0,
+        "Wednesday": 433147.0
+      },
+      "std": {
+        "Thursday": 953392.37,
+        "Tuesday": 990178.55,
+        "Wednesday": 943936.68
+      },
+      "count": {
+        "Thursday": 5,
+        "Tuesday": 5,
+        "Wednesday": 5
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "false": 816165.6
+      },
+      "median": {
+        "false": 433147.0
+      },
+      "std": {
+        "false": 891382.58
+      },
+      "count": {
+        "false": 15
+      }
+    }
+  },
+  "time_series_summary": {
+    "error": "\"Column(s) ['temp_avg_f'] do not exist\""
+  }
+}
