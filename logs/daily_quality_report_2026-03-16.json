@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-03-16T07:23:38.343285",
+  "total_records": 15,
+  "missing_values": {
+    "by_column": {
+      "date": 0,
+      "city": 0,
+      "state": 0,
+      "eia_region": 0,
+      "energy_consumption_mwh": 0,
+      "day_of_week": 0,
+      "is_weekend": 0
+    },
+    "total_missing": 0,
+    "percentage_missing": 0.0
+  },
+  "outliers": {
+    "energy": {
+      "count": 0,
+      "percentage": 0.0,
+      "negative_values": 0,
+      "extreme_high_values": 0
+    }
+  },
+  "data_freshness": {
+    "latest_date": "2026-03-12T00:00:00",
+    "oldest_date": "2026-03-10T00:00:00",
+    "hours_since_latest": 103.39,
+    "is_stale": true,
+    "freshness_threshold_hours": 24,
+    "date_range_days": 2
+  },
+  "summary_stats": {
+    "energy_consumption_mwh": {
+      "count": 15.0,
+      "mean": 769265.3333333334,
+      "std": 834198.0378202139,
+      "min": 29985.0,
+      "25%": 89526.0,
+      "50%": 368114.0,
+      "75%": 1247890.5,
+      "max": 2251518.0
+    }
+  }
+}
