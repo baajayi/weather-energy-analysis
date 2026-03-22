@@ -1,0 +1,15 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range
+2026-03-16,Chicago,Illinois,41.8781,-87.6298,37.4,35.2,36.3,Monday,False,<50°F
+2026-03-16,Houston,Texas,29.7604,-95.3698,42.6,39.4,41.0,Monday,False,<50°F
+2026-03-16,New York,New York,40.7128,-74.006,42.3,40.6,41.45,Monday,False,<50°F
+2026-03-16,Phoenix,Arizona,33.4484,-112.074,48.7,43.3,46.0,Monday,False,<50°F
+2026-03-16,Seattle,Washington,47.6062,-122.3321,42.1,39.6,40.85,Monday,False,<50°F
+2026-03-17,Chicago,Illinois,41.8781,-87.6298,36.3,34.5,35.4,Tuesday,False,<50°F
+2026-03-17,Houston,Texas,29.7604,-95.3698,42.8,37.9,40.349999999999994,Tuesday,False,<50°F
+2026-03-17,New York,New York,40.7128,-74.006,40.6,37.2,38.900000000000006,Tuesday,False,<50°F
+2026-03-17,Phoenix,Arizona,33.4484,-112.074,49.3,44.4,46.849999999999994,Tuesday,False,<50°F
+2026-03-17,Seattle,Washington,47.6062,-122.3321,41.5,40.6,41.05,Tuesday,False,<50°F
+2026-03-18,Chicago,Illinois,41.8781,-87.6298,40.3,36.1,38.2,Wednesday,False,<50°F
+2026-03-18,New York,New York,40.7128,-74.006,38.7,36.5,37.6,Wednesday,False,<50°F
+2026-03-18,Phoenix,Arizona,33.4484,-112.074,50.4,44.2,47.3,Wednesday,False,<50°F
+2026-03-18,Seattle,Washington,47.6062,-122.3321,42.3,41.0,41.65,Wednesday,False,<50°F
