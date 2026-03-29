@@ -1,0 +1,91 @@
+{
+  "quality_metrics": {
+    "timestamp": "2026-03-29T07:24:25.291222",
+    "total_records": 15,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "day_of_week": 0,
+        "is_weekend": 0
+      },
+      "total_missing": 0,
+      "percentage_missing": 0.0
+    },
+    "outliers": {
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2026-03-25T00:00:00",
+      "oldest_date": "2026-03-23T00:00:00",
+      "hours_since_latest": 103.41,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 2
+    },
+    "summary_stats": {
+      "energy_consumption_mwh": {
+        "count": 15.0,
+        "mean": 793247.5333333333,
+        "std": 850765.4599627047,
+        "min": 27753.0,
+        "25%": 101320.5,
+        "50%": 378084.0,
+        "75%": 1289576.0,
+        "max": 2216963.0
+      }
+    }
+  },
+  "correlations": {
+    "error": "\"['temp_avg_f'] not in index\""
+  },
+  "usage_patterns": {
+    "by_day_of_week": {
+      "mean": {
+        "Monday": 789418.4,
+        "Tuesday": 797433.0,
+        "Wednesday": 792891.2
+      },
+      "median": {
+        "Monday": 411030.0,
+        "Tuesday": 378084.0,
+        "Wednesday": 370840.0
+      },
+      "std": {
+        "Monday": 909317.15,
+        "Tuesday": 932578.74,
+        "Wednesday": 914716.01
+      },
+      "count": {
+        "Monday": 5,
+        "Tuesday": 5,
+        "Wednesday": 5
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "false": 793247.53
+      },
+      "median": {
+        "false": 378084.0
+      },
+      "std": {
+        "false": 850765.46
+      },
+      "count": {
+        "false": 15
+      }
+    }
+  },
+  "time_series_summary": {
+    "error": "\"Column(s) ['temp_avg_f'] do not exist\""
+  }
+}
