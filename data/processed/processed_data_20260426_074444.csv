@@ -1,0 +1,9 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-04-20,Chicago,Illinois,41.8781,-87.6298,42.1,37.9,40.0,Monday,False,<50°F,PJM,2060272.0,,,
+2026-04-21,Chicago,Illinois,41.8781,-87.6298,45.7,41.0,43.35,Tuesday,False,<50°F,PJM,2069352.0,3.3500000000000014,9080.0,0.440718507070903
+2026-04-20,Houston,Texas,29.7604,-95.3698,44.8,42.3,43.55,Monday,False,<50°F,ERCO,1113205.0,,,
+2026-04-20,New York,New York,40.7128,-74.006,41.2,39.0,40.1,Monday,False,<50°F,NYIS,360682.0,,,
+2026-04-21,New York,New York,40.7128,-74.006,41.7,38.1,39.900000000000006,Tuesday,False,<50°F,NYIS,353927.0,-0.19999999999999574,-6755.0,-1.8728408958583964
+2026-04-20,Phoenix,Arizona,33.4484,-112.074,49.3,44.6,46.95,Monday,False,<50°F,AZPS,97104.0,,,
+2026-04-20,Seattle,Washington,47.6062,-122.3321,45.0,41.7,43.35,Monday,False,<50°F,SCL,23811.0,,,
+2026-04-21,Seattle,Washington,47.6062,-122.3321,42.8,41.0,41.9,Tuesday,False,<50°F,SCL,23416.0,-1.4500000000000028,-395.0,-1.6588971483768034
