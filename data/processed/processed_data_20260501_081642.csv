@@ -1,0 +1,9 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-04-25,Chicago,Illinois,41.8781,-87.6298,42.1,39.7,40.900000000000006,Saturday,True,<50°F,PJM,1906095.0,,,
+2026-04-26,Chicago,Illinois,41.8781,-87.6298,42.6,39.6,41.1,Sunday,True,<50°F,PJM,1876005.0,0.19999999999999574,-30090.0,-1.5786201632132735
+2026-04-25,Houston,Texas,29.7604,-95.3698,48.0,45.1,46.55,Saturday,True,<50°F,ERCO,1377326.0,,,
+2026-04-26,Houston,Texas,29.7604,-95.3698,47.5,45.5,46.5,Sunday,True,<50°F,ERCO,1368272.0,-0.04999999999999716,-9054.0,-0.6573607119882974
+2026-04-25,New York,New York,40.7128,-74.006,41.0,39.4,40.2,Saturday,True,<50°F,NYIS,345022.0,,,
+2026-04-26,New York,New York,40.7128,-74.006,42.3,39.6,40.95,Sunday,True,<50°F,NYIS,311572.0,0.75,-33450.0,-9.695033939864706
+2026-04-25,Phoenix,Arizona,33.4484,-112.074,47.3,44.2,45.75,Saturday,True,<50°F,AZPS,84041.0,,,
+2026-04-26,Phoenix,Arizona,33.4484,-112.074,46.2,43.9,45.05,Sunday,True,<50°F,AZPS,78286.0,-0.7000000000000028,-5755.0,-6.8478480741542835
