@@ -1,0 +1,16 @@
+date,city,state,eia_region,energy_consumption_mwh,day_of_week,is_weekend
+2026-08-07,New York,New York,NYIS,560560.0,Friday,False
+2026-08-06,New York,New York,NYIS,569894.0,Thursday,False
+2026-08-05,New York,New York,NYIS,498657.0,Wednesday,False
+2026-08-07,Chicago,Illinois,PJM,2888603.0,Friday,False
+2026-08-06,Chicago,Illinois,PJM,2942061.0,Thursday,False
+2026-08-05,Chicago,Illinois,PJM,2810938.0,Wednesday,False
+2026-08-07,Houston,Texas,ERCO,1743332.0,Friday,False
+2026-08-06,Houston,Texas,ERCO,1752962.0,Thursday,False
+2026-08-05,Houston,Texas,ERCO,1758258.0,Wednesday,False
+2026-08-07,Phoenix,Arizona,AZPS,165682.0,Friday,False
+2026-08-06,Phoenix,Arizona,AZPS,161253.0,Thursday,False
+2026-08-05,Phoenix,Arizona,AZPS,163410.0,Wednesday,False
+2026-08-07,Seattle,Washington,SCL,26455.0,Friday,False
+2026-08-06,Seattle,Washington,SCL,26409.0,Thursday,False
+2026-08-05,Seattle,Washington,SCL,24918.0,Wednesday,False
