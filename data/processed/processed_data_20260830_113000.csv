@@ -1,0 +1,6 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-08-24,Chicago,Illinois,41.8781,-87.6298,46.0,42.4,44.2,Monday,False,<50°F,PJM,2380902.0,,,
+2026-08-24,Houston,Texas,29.7604,-95.3698,50.4,46.2,48.3,Monday,False,<50°F,ERCO,1825481.0,,,
+2026-08-24,New York,New York,40.7128,-74.006,46.2,43.7,44.95,Monday,False,<50°F,NYIS,429338.0,,,
+2026-08-24,Phoenix,Arizona,33.4484,-112.074,51.4,47.5,49.45,Monday,False,<50°F,AZPS,157285.0,,,
+2026-08-24,Seattle,Washington,47.6062,-122.3321,46.6,42.3,44.45,Monday,False,<50°F,SCL,24659.0,,,
