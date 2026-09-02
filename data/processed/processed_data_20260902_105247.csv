@@ -1,0 +1,10 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-08-27,Chicago,Illinois,41.8781,-87.6298,46.8,43.7,45.25,Thursday,False,<50°F,PJM,2658099.0,,,
+2026-08-28,Chicago,Illinois,41.8781,-87.6298,46.9,43.9,45.4,Friday,False,<50°F,PJM,2600887.0,0.14999999999999858,-57212.0,-2.1523652806009097
+2026-08-27,Houston,Texas,29.7604,-95.3698,50.0,46.8,48.4,Thursday,False,<50°F,ERCO,1777527.0,,,
+2026-08-27,New York,New York,40.7128,-74.006,45.9,44.2,45.05,Thursday,False,<50°F,NYIS,459399.0,,,
+2026-08-28,New York,New York,40.7128,-74.006,47.1,44.2,45.650000000000006,Friday,False,<50°F,NYIS,451260.0,0.6000000000000085,-8139.0,-1.7716625417121046
+2026-08-27,Phoenix,Arizona,33.4484,-112.074,52.3,49.1,50.7,Thursday,False,50-60°F,AZPS,165567.0,,,
+2026-08-28,Phoenix,Arizona,33.4484,-112.074,52.2,48.9,50.55,Friday,False,50-60°F,AZPS,165659.0,-0.15000000000000568,92.0,0.0555666286156109
+2026-08-27,Seattle,Washington,47.6062,-122.3321,45.3,42.6,43.95,Thursday,False,<50°F,SCL,24197.0,,,
+2026-08-28,Seattle,Washington,47.6062,-122.3321,45.1,42.3,43.7,Friday,False,<50°F,SCL,23548.0,-0.25,-649.0,-2.682150679836348
