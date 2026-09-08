@@ -1,0 +1,91 @@
+{
+  "quality_metrics": {
+    "timestamp": "2026-09-08T10:51:02.503267",
+    "total_records": 15,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "day_of_week": 0,
+        "is_weekend": 0
+      },
+      "total_missing": 0,
+      "percentage_missing": 0.0
+    },
+    "outliers": {
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2026-09-04T00:00:00",
+      "oldest_date": "2026-09-02T00:00:00",
+      "hours_since_latest": 106.85,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 2
+    },
+    "summary_stats": {
+      "energy_consumption_mwh": {
+        "count": 15.0,
+        "mean": 1061232.3333333333,
+        "std": 1160704.4192601114,
+        "min": 22306.0,
+        "25%": 140662.5,
+        "50%": 480126.0,
+        "75%": 1729169.0,
+        "max": 3007487.0
+      }
+    }
+  },
+  "correlations": {
+    "error": "\"['temp_avg_f'] not in index\""
+  },
+  "usage_patterns": {
+    "by_day_of_week": {
+      "mean": {
+        "Friday": 1049771.4,
+        "Thursday": 1070654.0,
+        "Wednesday": 1063271.6
+      },
+      "median": {
+        "Friday": 480126.0,
+        "Thursday": 485700.0,
+        "Wednesday": 444581.0
+      },
+      "std": {
+        "Friday": 1227553.68,
+        "Thursday": 1269617.09,
+        "Wednesday": 1263418.25
+      },
+      "count": {
+        "Friday": 5,
+        "Thursday": 5,
+        "Wednesday": 5
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "false": 1061232.33
+      },
+      "median": {
+        "false": 480126.0
+      },
+      "std": {
+        "false": 1160704.42
+      },
+      "count": {
+        "false": 15
+      }
+    }
+  },
+  "time_series_summary": {
+    "error": "\"Column(s) ['temp_avg_f'] do not exist\""
+  }
+}
