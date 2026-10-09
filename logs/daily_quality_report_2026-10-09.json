@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-10-09T12:47:59.518524",
+  "total_records": 4,
+  "missing_values": {
+    "by_column": {
+      "date": 0,
+      "city": 0,
+      "state": 0,
+      "lat": 0,
+      "lon": 0,
+      "temp_max_f": 0,
+      "temp_min_f": 0,
+      "temp_avg_f": 0,
+      "day_of_week": 0,
+      "is_weekend": 0,
+      "temp_range": 0,
+      "eia_region": 0,
+      "energy_consumption_mwh": 0,
+      "temp_change_f": 4,
+      "energy_change_mwh": 4,
+      "energy_change_pct": 4
+    },
+    "total_missing": 12,
+    "percentage_missing": 300.0
+  },
+  "outliers": {
+    "temperature": {
+      "count": 0,
+      "percentage": 0.0,
+      "extreme_values": []
+    },
+    "energy": {
+      "count": 1,
+      "percentage": 25.0,
+      "negative_values": 0,
+      "extreme_high_values": 1
+    }
+  },
+  "data_freshness": {
+    "latest_date": "2026-10-03T00:00:00",
+    "oldest_date": "2026-10-03T00:00:00",
+    "hours_since_latest": 156.8,
+    "is_stale": true,
+    "freshness_threshold_hours": 24,
+    "date_range_days": 0
+  },
+  "summary_stats": {
+    "lat": {
+      "count": 4.0,
+      "mean": 40.911375,
+      "std": 5.816375357199133,
+      "min": 33.4484,
+      "25%": 38.8967,
+      "50%": 41.29545,
+      "75%": 43.310125,
+      "max": 47.6062
+    },
+    "lon": {
+      "count": 4.0,
+      "mean": -99.01047500000001,
+      "std": 22.130653037114982,
+      "min": -122.3321,
+      "25%": -114.638525,
+      "50%": -99.8519,
+      "75%": -84.22385,
+      "max": -74.006
+    },
+    "temp_max_f": {
+      "count": 4.0,
+      "mean": 45.65,
+      "std": 2.574878637916746,
+      "min": 44.1,
+      "25%": 44.325,
+      "50%": 44.5,
+      "75%": 45.825,
+      "max": 49.5
+    },
+    "temp_min_f": {
+      "count": 4.0,
+      "mean": 42.775000000000006,
+      "std": 2.4253865671269814,
+      "min": 40.6,
+      "25%": 41.425000000000004,
+      "50%": 42.150000000000006,
+      "75%": 43.5,
+      "max": 46.2
+    },
+    "temp_avg_f": {
+      "count": 4.0,
+      "mean": 44.2125,
+      "std": 2.4672437388038224,
+      "min": 42.5,
+      "25%": 42.800000000000004,
+      "50%": 43.25,
+      "75%": 44.6625,
+      "max": 47.85
+    },
+    "energy_consumption_mwh": {
+      "count": 4.0,
+      "mean": 605157.5,
+      "std": 905125.0470678991,
+      "min": 22034.0,
+      "25%": 93208.25,
+      "50%": 224923.0,
+      "75%": 736872.25,
+      "max": 1948750.0
+    },
+    "temp_change_f": {
+      "count": 0.0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "25%": NaN,
+      "50%": NaN,
+      "75%": NaN,
+      "max": NaN
+    },
+    "energy_change_mwh": {
+      "count": 0.0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "25%": NaN,
+      "50%": NaN,
+      "75%": NaN,
+      "max": NaN
+    },
+    "energy_change_pct": {
+      "count": 0.0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "25%": NaN,
+      "50%": NaN,
+      "75%": NaN,
+      "max": NaN
+    }
+  }
+}
