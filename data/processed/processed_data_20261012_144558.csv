@@ -1,0 +1,11 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-10-06,Chicago,Illinois,41.8781,-87.6298,45.3,41.0,43.15,Tuesday,False,<50°F,PJM,2021732.0,,,
+2026-10-07,Chicago,Illinois,41.8781,-87.6298,46.2,42.3,44.25,Wednesday,False,<50°F,PJM,2057180.0,1.1000000000000014,35448.0,1.7533481193352962
+2026-10-06,Houston,Texas,29.7604,-95.3698,48.6,44.8,46.7,Tuesday,False,<50°F,ERCO,1403310.0,,,
+2026-10-07,Houston,Texas,29.7604,-95.3698,48.7,45.0,46.85,Wednesday,False,<50°F,ERCO,1406691.0,0.14999999999999858,3381.0,0.2409303717638922
+2026-10-06,New York,New York,40.7128,-74.006,42.8,40.6,41.7,Tuesday,False,<50°F,NYIS,338815.0,,,
+2026-10-07,New York,New York,40.7128,-74.006,43.7,40.6,42.150000000000006,Wednesday,False,<50°F,NYIS,346725.0,0.45000000000000284,7910.0,2.3346073816094437
+2026-10-06,Phoenix,Arizona,33.4484,-112.074,49.6,46.4,48.0,Tuesday,False,<50°F,AZPS,138890.0,,,
+2026-10-07,Phoenix,Arizona,33.4484,-112.074,50.4,46.4,48.4,Wednesday,False,<50°F,AZPS,128509.0,0.3999999999999986,-10381.0,-7.474260205918348
+2026-10-06,Seattle,Washington,47.6062,-122.3321,43.9,41.4,42.65,Tuesday,False,<50°F,SCL,23950.0,,,
+2026-10-07,Seattle,Washington,47.6062,-122.3321,44.1,41.5,42.8,Wednesday,False,<50°F,SCL,23017.0,0.14999999999999858,-933.0,-3.8956158663883134
