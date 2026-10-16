@@ -1,0 +1,251 @@
+{
+  "quality_metrics": {
+    "timestamp": "2026-10-16T11:01:08.497364",
+    "total_records": 9,
+    "missing_values": {
+      "by_column": {
+        "date": 0,
+        "city": 0,
+        "state": 0,
+        "lat": 0,
+        "lon": 0,
+        "temp_max_f": 0,
+        "temp_min_f": 0,
+        "temp_avg_f": 0,
+        "day_of_week": 0,
+        "is_weekend": 0,
+        "temp_range": 0,
+        "eia_region": 0,
+        "energy_consumption_mwh": 0,
+        "temp_change_f": 5,
+        "energy_change_mwh": 5,
+        "energy_change_pct": 5
+      },
+      "total_missing": 15,
+      "percentage_missing": 166.66666666666669
+    },
+    "outliers": {
+      "temperature": {
+        "count": 0,
+        "percentage": 0.0,
+        "extreme_values": []
+      },
+      "energy": {
+        "count": 0,
+        "percentage": 0.0,
+        "negative_values": 0,
+        "extreme_high_values": 0
+      }
+    },
+    "data_freshness": {
+      "latest_date": "2026-10-11T00:00:00",
+      "oldest_date": "2026-10-10T00:00:00",
+      "hours_since_latest": 131.02,
+      "is_stale": true,
+      "freshness_threshold_hours": 24,
+      "date_range_days": 1
+    },
+    "summary_stats": {
+      "lat": {
+        "count": 9.0,
+        "mean": 39.672377777777776,
+        "std": 6.260087361366809,
+        "min": 29.7604,
+        "25%": 33.4484,
+        "50%": 40.7128,
+        "75%": 41.8781,
+        "max": 47.6062
+      },
+      "lon": {
+        "count": 9.0,
+        "mean": -98.60595555555555,
+        "std": 19.20409010381064,
+        "min": -122.3321,
+        "25%": -112.074,
+        "50%": -95.3698,
+        "75%": -87.6298,
+        "max": -74.006
+      },
+      "temp_max_f": {
+        "count": 9.0,
+        "mean": 45.56666666666667,
+        "std": 2.5826343140289922,
+        "min": 42.4,
+        "25%": 42.8,
+        "50%": 46.0,
+        "75%": 48.0,
+        "max": 49.3
+      },
+      "temp_min_f": {
+        "count": 9.0,
+        "mean": 42.47777777777778,
+        "std": 1.9992359651738063,
+        "min": 39.7,
+        "25%": 41.7,
+        "50%": 41.9,
+        "75%": 43.5,
+        "max": 45.5
+      },
+      "temp_avg_f": {
+        "count": 9.0,
+        "mean": 44.022222222222226,
+        "std": 2.252791478243036,
+        "min": 41.25,
+        "25%": 42.25,
+        "50%": 43.95,
+        "75%": 45.75,
+        "max": 47.4
+      },
+      "energy_consumption_mwh": {
+        "count": 9.0,
+        "mean": 695459.7777777778,
+        "std": 828498.378996872,
+        "min": 23142.0,
+        "25%": 116215.0,
+        "50%": 325120.0,
+        "75%": 1384614.0,
+        "max": 1982333.0
+      },
+      "temp_change_f": {
+        "count": 4.0,
+        "mean": -0.6374999999999975,
+        "std": 0.42695628191498164,
+        "min": -0.8999999999999986,
+        "25%": -0.8624999999999954,
+        "50%": -0.8249999999999957,
+        "75%": -0.5999999999999979,
+        "max": 0.0
+      },
+      "energy_change_mwh": {
+        "count": 4.0,
+        "mean": 15798.5,
+        "std": 24707.270650559523,
+        "min": -6861.0,
+        "25%": -1576.5,
+        "50%": 11024.5,
+        "75%": 28399.5,
+        "max": 48006.0
+      },
+      "energy_change_pct": {
+        "count": 4.0,
+        "mean": 1.1078757496170044,
+        "std": 5.105203824931249,
+        "min": -5.574604309532316,
+        "25%": -0.7940918344481573,
+        "50%": 1.640602866598595,
+        "75%": 3.5425704506637565,
+        "max": 6.724901574803144
+      }
+    }
+  },
+  "correlations": {
+    "overall": {
+      "correlation_coefficient": 0.2275,
+      "r_squared": 0.0518,
+      "slope": 83679.8314,
+      "intercept": -2988312.3565,
+      "sample_size": 9
+    },
+    "by_city": {
+      "Chicago": {
+        "correlation_coefficient": -1.0,
+        "r_squared": 1.0,
+        "slope": -56477.6471,
+        "intercept": 4464525.5882,
+        "sample_size": 2
+      },
+      "New York": {
+        "correlation_coefficient": -1.0,
+        "r_squared": 1.0,
+        "slope": -27330.0,
+        "intercept": 1501676.5,
+        "sample_size": 2
+      },
+      "Phoenix": {
+        "correlation_coefficient": 1.0,
+        "r_squared": 1.0,
+        "slope": 7623.3333,
+        "intercept": -238270.0,
+        "sample_size": 2
+      },
+      "Seattle": {
+        "correlation_coefficient": NaN,
+        "r_squared": 0.0,
+        "slope": 0.0,
+        "intercept": 23234.5,
+        "sample_size": 2
+      }
+    }
+  },
+  "usage_patterns": {
+    "by_temperature_range": {
+      "mean": {
+        "<50\u00b0F": 695459.78
+      },
+      "median": {
+        "<50\u00b0F": 325120.0
+      },
+      "std": {
+        "<50\u00b0F": 828498.38
+      },
+      "count": {
+        "<50\u00b0F": 9
+      }
+    },
+    "by_day_of_week": {
+      "mean": {
+        "Saturday": 758055.8,
+        "Sunday": 617214.75
+      },
+      "median": {
+        "Saturday": 325120.0,
+        "Sunday": 231599.5
+      },
+      "std": {
+        "Saturday": 852484.63,
+        "Sunday": 920194.89
+      },
+      "count": {
+        "Saturday": 5,
+        "Sunday": 4
+      }
+    },
+    "weekend_vs_weekday": {
+      "mean": {
+        "true": 695459.78
+      },
+      "median": {
+        "true": 325120.0
+      },
+      "std": {
+        "true": 828498.38
+      },
+      "count": {
+        "true": 9
+      }
+    },
+    "heatmap_data": {
+      "Saturday": {
+        "<50\u00b0F": 758055.8
+      },
+      "Sunday": {
+        "<50\u00b0F": 617214.75
+      }
+    }
+  },
+  "time_series_summary": {
+    "date_range": {
+      "start": "2026-10-10T00:00:00",
+      "end": "2026-10-11T00:00:00",
+      "total_days": 1
+    },
+    "monthly_trends": {
+      "temp_avg_f": {
+        "2026-10": 44.02
+      },
+      "energy_consumption_mwh": {
+        "2026-10": 695459.78
+      }
+    }
+  }
+}
