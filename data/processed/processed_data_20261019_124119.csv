@@ -1,0 +1,5 @@
+date,city,state,lat,lon,temp_max_f,temp_min_f,temp_avg_f,day_of_week,is_weekend,temp_range,eia_region,energy_consumption_mwh,temp_change_f,energy_change_mwh,energy_change_pct
+2026-10-13,Chicago,Illinois,41.8781,-87.6298,46.4,43.7,45.05,Tuesday,False,<50°F,PJM,2264602.0,,,
+2026-10-14,Chicago,Illinois,41.8781,-87.6298,43.9,42.6,43.25,Wednesday,False,<50°F,PJM,2306714.0,-1.7999999999999972,42112.0,1.8595762080930722
+2026-10-13,New York,New York,40.7128,-74.006,44.8,42.4,43.599999999999994,Tuesday,False,<50°F,NYIS,377492.0,,,
+2026-10-14,New York,New York,40.7128,-74.006,45.9,43.5,44.7,Wednesday,False,<50°F,NYIS,391457.0,1.1000000000000085,13965.0,3.699416146567347
